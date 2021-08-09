@@ -4,6 +4,7 @@
   "description": "precede other vanila-instagram project",
   "main": "index.js",
   "scripts": {
+    "precommit": "lint-staged",
     "build": "cross-env NODE_ENV=\"production\" TS_NODE_PROJECT=\"script/tsconfig.webpack.json\" webpack",
     "dev": "cross-env NODE_ENV=\"development\" TS_NODE_PROJECT=\"script/tsconfig.webpack.json\" webpack serve",
     "lint": "eslint ."
@@ -13,6 +14,8 @@
     "url": "git+https://github.com/galaxy4276/summers-sns.git"
   },
   "lint-staged": {
+    "**/*.ts": "eslint",
+    "**/*.tsx": "eslint",
     "**/*": "prettier --write --ignore-unknown"
   },
   "keywords": [
