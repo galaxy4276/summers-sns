@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "precede other vanila-instagram project",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "precommit": "lint-staged"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/galaxy4276/summers-sns.git"
@@ -11,6 +13,10 @@
   "keywords": [
     "sns"
   ],
+  "lint-staged": {
+    "**/*.ts": "eslint",
+    "**/*": "prettier --write --ignore-unknown"
+  },
   "author": "galaxy4276",
   "license": "MIT",
   "bugs": {
@@ -18,21 +24,27 @@
   },
   "homepage": "https://github.com/galaxy4276/summers-sns#readme",
   "dependencies": {
-    "@types/koa": "^2.13.4",
+    "jest": "^27.0.6",
     "koa": "^2.13.1",
     "koa-router": "^10.0.0",
     "typescript": "^4.3.5"
   },
   "devDependencies": {
+    "@types/koa": "^2.13.4",
     "@types/koa-router": "^7.4.4",
     "@types/node": "^16.4.13",
+    "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.24.0",
     "eslint-plugin-prettier": "^3.4.0",
     "prettier": "^2.3.2",
+    "supertest": "^6.1.4",
+    "ts-jest": "^27.0.4",
     "ts-node-dev": "^1.1.8"
   }
 }
