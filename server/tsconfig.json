@@ -9,24 +9,25 @@
       "DOM.Iterable",
       "ESNext"
     ],
+    "outDir": "./build",
     "allowJs": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "Node",
-    "isolatedModules": true,
+    "isolatedModules": false,
     "sourceMap": true,
     "noUnusedLocals": true,
     "esModuleInterop": true,
-    "baseUrl": "./",
+    "baseUrl": ".",
     "incremental": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@api/*": ["./src/api/*"],
-      "@config/*": ["./src/config/*"],
-      "@middlewares/*": ["./src/middlewares/*"],
-      "@services/*": ["./src/services/*"],
-      "@test/*": ["./test/*"]
+      "@api/*": ["src/api/*"],
+      "@config/*": ["src/config/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@services/*": [".src/services/*"],
+      "@test/*": ["test/*"]
     }
   },
   "include": ["src/**/*"],
