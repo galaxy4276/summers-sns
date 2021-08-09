@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "precede other vanila-instagram project",
   "main": "index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/galaxy4276/summers-sns.git"
@@ -17,5 +16,6 @@
   "bugs": {
     "url": "https://github.com/galaxy4276/summers-sns/issues"
   },
-  "homepage": "https://github.com/galaxy4276/summers-sns#readme"
+  "homepage": "https://github.com/galaxy4276/summers-sns#readme",
+  "dependencies": {}
 }
