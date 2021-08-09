@@ -20,7 +20,15 @@
     "baseUrl": "./",
     "incremental": true,
     "noFallthroughCasesInSwitch": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@app/*": ["./src/app/*"],
+      "@components/*": ["./src/components/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@services/*": ["./src/services/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@test/*": ["./test/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "build"]

@@ -8,13 +8,20 @@ type DevMode = 'production' | 'development' | 'none';
 const WebpackConfig: Configuration = {
   name: 'react-typescript-webpack-config',
   mode: process.env.NODE_ENV as DevMode | 'development',
-  entry: join(__dirname, "src", "App", "index.tsx"),
+  entry: join(__dirname, "src", "app", "index.tsx"),
   output: {
     path: join(__dirname, "build"),
     filename: "index.bundle.js"
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    alias: {
+      "@api": "./src/api/",
+      "@config": "./src/config/",
+      "@middlewares": "./src/middlewares/",
+      "@services": "./src/services/",
+      "@test": "./test"
+    },
   },
   devServer: {
     contentBase: join(__dirname, "./build/"),
