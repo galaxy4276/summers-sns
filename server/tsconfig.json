@@ -20,7 +20,14 @@
     "esModuleInterop": true,
     "baseUrl": "./",
     "incremental": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@api/*": ["./src/api/*"],
+      "@config/*": ["./src/config/*"],
+      "@middlewares/*": ["./src/middlewares/*"],
+      "@services/*": ["./src/services/*"],
+      "@test/*": ["./test/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "build"]
