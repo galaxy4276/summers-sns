@@ -1,9 +1,9 @@
 import Koa, { DefaultState, DefaultContext, Context } from 'koa';
-import { config as loadEnvVariables } from 'dotenv';
 import { setLevel as setLogLevel } from 'loglevel';
 import koaBody from 'koa-body';
 import morgan from 'koa-morgan';
 import Router from 'koa-router';
+import { config as loadEnvVariables } from 'dotenv';
 
 /**
  * @desc Koa 서버 인스턴스를 서버 설정 또는 미들웨어를 부착하는 메서드와 함께 반환
@@ -23,33 +23,33 @@ class KoaServer {
     setLogLevel(this.isDevelopment ? 'DEBUG' : 'ERROR');
   }
 
-  setRouter(): this {
+  setRouter() {
     this.app.use(this.router.routes());
     this.router.prefix('/api');
     return this;
   }
 
-  setLogger(): this {
+  setLogger() {
     this.app.use(morgan(this.isDevelopment ? 'dev' : 'common'));
     return this;
   }
 
-  setParser(): this {
+  setParser() {
     this.app.use(koaBody());
     return this;
   }
 
-  setMiddleware(callback: (ctx: Context) => void): this {
+  setMiddleware(callback: (ctx: Context) => void) {
     this.app.use(callback);
     return this;
   }
 
-  setErrorHandler(handler: (err: Error, ctx: Context) => void): this {
+  setErrorHandler(handler: (err: Error, ctx: Context) => void) {
     this.app.on('error', handler);
     return this;
   }
 
-  run(runCb?: () => void): void {
+  run(runCb?: () => void) {
     const port = process.env.SERVER_PORT;
     if (!port) {
       throw Error('💥 Cannot read server port env variable. 💥');
