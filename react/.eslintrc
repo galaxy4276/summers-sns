@@ -27,10 +27,19 @@
     "plugins": [
         "prettier",
         "react",
+        "@emotion",
         "@typescript-eslint",
         "react-hooks"
     ],
     "rules": {
+        "@emotion/jsx-import": "error",
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": [
+            "warn",
+            {
+                "additionalHooks": "useRecoilCallback"
+            }
+        ],
         "prettier/prettier": "error",
         "react/react-in-jsx-scope": "off",
         "react/jsx-filename-extension": [

@@ -1,5 +1,6 @@
 {
   "presets": [
+    "@emotion",
     "@babel/preset-env",
     "@babel/react",
     "@babel/preset-typescript"
