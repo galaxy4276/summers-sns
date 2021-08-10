@@ -1,18 +1,6 @@
 import { createConnection, ConnectionConfig, Connection } from 'mariadb';
 import { config as loadEnvVariables } from 'dotenv';
-import {
-  createDatabaseSql,
-  createUserTableSql,
-  createPostTableSql,
-  createPostLikerTableSql,
-  createCommentLikerTableSql,
-  createCommentTableSql,
-  createFollowerTableSql,
-  createFollowingTableSql,
-  createUploadFileTableSql,
-  createUserRoleTableSql,
-  createAdminTableSql,
-} from '@config/database/sql';
+import createDatabaseIfNotExists from '@config/database/sql';
 import { debug as log } from 'loglevel';
 
 /**
@@ -34,18 +22,12 @@ class DatabaseConnection {
 
     try {
       await this.conn.beginTransaction();
-      await this.conn.query(createDatabaseSql());
-      await this.conn.query(createUserTableSql());
-      await this.conn.query(createPostTableSql());
-      await this.conn.query(createCommentTableSql());
-      await this.conn.query(createPostLikerTableSql());
-      await this.conn.query(createCommentLikerTableSql());
-      await this.conn.query(createFollowerTableSql());
-      await this.conn.query(createFollowingTableSql());
-      await this.conn.query(createUploadFileTableSql());
-      await this.conn.query(createUserRoleTableSql());
-      await this.conn.query(createAdminTableSql());
-      await this.conn.commit();
+      await createDatabaseIfNotExists(this.conn);
+      await this.conn.commit().then(() => {
+        if (process.env.NODE_ENV === 'development') {
+          log('successfully reflect ddl queries.');
+        }
+      });
     } catch (err) {
       log(err);
       await this.conn

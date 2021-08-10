@@ -1,8 +1,10 @@
-export const createDatabaseSql = () =>
+import { Connection } from 'mariadb';
+
+const createDatabaseSqlIfNotExists = () =>
   `CREATE DATABASE IF NOT EXISTS \`summers-sns\` DEFAULT CHARACTER SET utf8mb4
 COLLATE utf8mb4_general_ci;`;
 
-export const createUserTableSql = () =>
+const createUserTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`users\`
   (
      id              INT(11) NOT NULL,
@@ -18,7 +20,7 @@ export const createUserTableSql = () =>
      CONSTRAINT pk_users PRIMARY KEY(id)
   );`;
 
-export const createPostTableSql = () =>
+const createPostTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`posts\`
   (
      id         INT(11) NOT NULL,
@@ -31,7 +33,7 @@ export const createPostTableSql = () =>
      FOREIGN KEY(user_id) REFERENCES \`users\`(id)
   );`;
 
-export const createFollowerTableSql = () =>
+const createFollowerTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`followers\`
   (
      id          INT(11) NOT NULL,
@@ -43,7 +45,7 @@ export const createFollowerTableSql = () =>
      FOREIGN KEY(follower_id) REFERENCES \`users\`(id)
   );`;
 
-export const createFollowingTableSql = () =>
+const createFollowingTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`followings\`
   (
      id           INT(11) NOT NULL,
@@ -55,7 +57,7 @@ export const createFollowingTableSql = () =>
      FOREIGN KEY(following_id) REFERENCES \`users\`(id)
   );`;
 
-export const createUploadFileTableSql = () =>
+const createUploadFileTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`upload_files\`
   (
      id         INT(11) NOT NULL,
@@ -68,7 +70,7 @@ export const createUploadFileTableSql = () =>
      FOREIGN KEY(post_id) REFERENCES \`posts\`(id)
   );`;
 
-export const createCommentTableSql = () =>
+const createCommentTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`comments\`
   (
      id         INT(11) NOT NULL,
@@ -83,7 +85,7 @@ export const createCommentTableSql = () =>
      FOREIGN KEY(post_id) REFERENCES \`posts\`(id)
   );`;
 
-export const createPostLikerTableSql = () =>
+const createPostLikerTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`post_likers\`
   (
      id         INT(11) NOT NULL,
@@ -97,7 +99,7 @@ export const createPostLikerTableSql = () =>
      FOREIGN KEY(post_id) REFERENCES \`posts\`(id)
   );`;
 
-export const createCommentLikerTableSql = () =>
+const createCommentLikerTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`comment_likers\`
   (
      id         INT(11) NOT NULL,
@@ -111,7 +113,7 @@ export const createCommentLikerTableSql = () =>
      FOREIGN KEY(comment_id) REFERENCES \`comments\`(id)
   );`;
 
-export const createUserRoleTableSql = () =>
+const createUserRoleTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`user_roles\`
   (
      id         INT(11) NOT NULL,
@@ -123,7 +125,7 @@ export const createUserRoleTableSql = () =>
   );
 `;
 
-export const createAdminTableSql = () =>
+const createAdminTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`admins\`
   (
      id         INT(11) NOT NULL,
@@ -134,3 +136,19 @@ export const createAdminTableSql = () =>
      expired_at TIMESTAMP NULL,
      CONSTRAINT pk_user_roles PRIMARY KEY(id)
   );`;
+
+const createDatabaseIfNotExists = async (conn: Connection): Promise<void> => {
+  await conn.query(createDatabaseSqlIfNotExists());
+  await conn.query(createUserTableSql());
+  await conn.query(createPostTableSql());
+  await conn.query(createCommentTableSql());
+  await conn.query(createPostLikerTableSql());
+  await conn.query(createCommentLikerTableSql());
+  await conn.query(createFollowerTableSql());
+  await conn.query(createFollowingTableSql());
+  await conn.query(createUploadFileTableSql());
+  await conn.query(createUserRoleTableSql());
+  await conn.query(createAdminTableSql());
+};
+
+export default createDatabaseIfNotExists;
