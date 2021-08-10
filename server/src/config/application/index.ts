@@ -66,5 +66,5 @@ class KoaServer {
  * @desc KoaServer 인스턴스의 Factory Function
  */
 export default function getKoaServer(): KoaServer {
-  return new KoaServer().setLogger().setParser().setRouter();
+  return new KoaServer();
 }
