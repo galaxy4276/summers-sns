@@ -6,7 +6,7 @@ import { debug as log } from 'loglevel';
 /**
  * @desc 데이터베이스 연결 객체를 반환하는 메서드를 포함한 클래스
  */
-class DatabaseConnection {
+export class DatabaseConnection {
   private conn?: Connection;
 
   private readonly config: ConnectionConfig;
@@ -15,8 +15,8 @@ class DatabaseConnection {
     this.config = config;
   }
 
-  async initialize() {
-    if (!this.conn) {
+  async initialize(): Promise<void> {
+    if (!this.conn?.isValid()) {
       throw Error('💥 database not connected! 💥');
     }
 
@@ -36,19 +36,22 @@ class DatabaseConnection {
     }
   }
 
-  async connect() {
+  async connect(): Promise<void> {
     this.conn = await createConnection(this.config);
   }
 
-  getConnection() {
-    return this.conn;
+  getConnection(): Connection {
+    if (this.conn?.isValid()) {
+      return this.conn;
+    }
+    throw Error('💥 database not connected! 💥');
   }
 }
 
 /**
  * @desc 데이터베이스 객체 인스턴스를 반환하는 Factory 함수
  */
-function getDatabaseConnection(): DatabaseConnection {
+export function getDatabaseConnection(): DatabaseConnection {
   loadEnvVariables();
   const config: ConnectionConfig = {
     host: process.env.DB_HOST,

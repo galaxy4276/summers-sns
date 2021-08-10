@@ -23,33 +23,37 @@ class KoaServer {
     setLogLevel(this.isDevelopment ? 'DEBUG' : 'ERROR');
   }
 
-  setRouter() {
+  setRouter(): this {
     this.app.use(this.router.routes());
     this.router.prefix('/api');
     return this;
   }
 
-  setLogger() {
+  setLogger(): this {
     this.app.use(morgan(this.isDevelopment ? 'dev' : 'common'));
     return this;
   }
 
-  setParser() {
+  setParser(): this {
     this.app.use(koaBody());
     return this;
   }
 
-  setMiddleware(callback: (ctx: Context) => void) {
+  setMiddleware(callback: (ctx: Context) => void): this {
     this.app.use(callback);
     return this;
   }
 
-  setErrorHandler(handler: (err: Error, ctx: Context) => void) {
+  setErrorHandler(handler: (err: Error, ctx: Context) => void): this {
     this.app.on('error', handler);
     return this;
   }
 
-  run(runCb?: () => void) {
+  getServer(): Koa {
+    return this.app;
+  }
+
+  run(runCb?: () => void): void {
     const port = process.env.SERVER_PORT;
     if (!port) {
       throw Error('💥 Cannot read server port env variable. 💥');

@@ -32,26 +32,26 @@ jobs:
           character set server: 'utf8'
           collation server: 'utf8_general_ci'
           mariadb version: '10.4.10'
-          mysql database: 'vanila-instagram'
-          mysql root password: 'sungsimdang12'
-          mysql user: 'user'
-          mysql password: 'sungsimdang'
+          mysql database: 'summers-sns'
+          mysql root password: 'test'
+          mysql user: 'root'
+          mysql password: 'test12'
 
 #      - name: 백엔드 환경설정 파일 복사 💥
 #        run: pwd && cp .env.example .env
 #        working-directory: ${{ env.SERVER }}
 #
-#      - name: 백엔드 패키지 설치 🔰
-#        run: npm ci
-#        working-directory: ${{ env.SERVER }}
+      - name: 백엔드 패키지 설치 🔰
+        run: npm ci
+        working-directory: ${{ env.SERVER }}
 #
-#      - name: 백엔드 ESLint 검사 😒
-#        run: npm run lint
-#        working-directory: ${{ env.SERVER }}
+      - name: 백엔드 ESLint 검사 😒
+        run: npm run lint
+        working-directory: ${{ env.SERVER }}
 #
-#      - name: 백엔드 jest
-#        run: npm run test
-#        working-directory: ${{ env.SERVER }}
+      - name: E2E 통합 테스트
+        run: npm run test
+        working-directory: ${{ env.SERVER }}
 
       ########################################################
       ## -- 프런트엔드 --
