@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { connectDatabase, getTestServer } from '@test/app';
+import { getDatabasePool, getTestServer } from '@test/app';
 import { DatabaseConnection } from '@config/database';
 import { Server } from 'http';
 
@@ -9,7 +9,12 @@ describe('서버 환경 테스트', () => {
 
   beforeAll(async () => {
     app = getTestServer();
-    pool = await connectDatabase();
+    pool = await getDatabasePool();
+  });
+
+  afterAll(async () => {
+    app.close();
+    await pool.getConnection().end();
   });
 
   it('서버가 정상적으로 실행 된다.', async () => {
