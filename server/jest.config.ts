@@ -2,12 +2,12 @@ import { Config } from '@jest/types'
 
 const jestConfig: Config.InitialOptions = {
   rootDir: './',
-  moduleFileExtensions: ['json', 'ts'],
+  moduleFileExtensions: ['json', 'ts', 'js'],
   testEnvironment: 'node',
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
-  testRegex: '*.test.ts$',
+  testRegex: '.test.ts$',
   transformIgnorePatterns: ['<rootDir>/node_modules/'],
   moduleNameMapper: {
     '^@api/(.*)$': '<rootDir>/src/api/$1',
