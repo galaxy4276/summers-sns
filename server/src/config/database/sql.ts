@@ -134,7 +134,7 @@ const createAdminTableSql = () =>
      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
      expired_at TIMESTAMP NULL,
-     CONSTRAINT pk_user_roles PRIMARY KEY(id)
+     CONSTRAINT pk_user_admins PRIMARY KEY(id)
   );`;
 
 const createDatabaseIfNotExists = async (conn: Connection): Promise<void> => {
