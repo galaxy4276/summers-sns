@@ -1,6 +1,5 @@
 import { join } from 'path';
 import { Configuration } from 'webpack';
-// @ts-ignore TODO: esModuleInterop Lint 적용이 안 됨
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 type DevMode = 'production' | 'development' | 'none';
