@@ -6,7 +6,7 @@ const runMethodCallback = () =>
   log(`listening on ${process.env.SERVER_PORT}...`);
 
 async function main(): Promise<void> {
-  const koa = getKoaServer().setLogger().setParser().setRouter();
+  const koa = getKoaServer();
   await conn.connect().then(() => log('Database Connected'));
   await conn.initialize();
   koa.run(runMethodCallback);
