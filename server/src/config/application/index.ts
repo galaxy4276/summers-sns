@@ -4,23 +4,40 @@ import koaBody from 'koa-body';
 import morgan from 'koa-morgan';
 import Router from 'koa-router';
 import { config as loadEnvVariables } from 'dotenv';
+import Joi from 'joi';
+import { SystemVariables } from '@typings/system';
+import { ConnectionConfig } from 'mariadb';
+
+type NumberVariables = number | undefined;
 
 /**
  * @desc Koa 서버 인스턴스를 서버 설정 또는 미들웨어를 부착하는 메서드와 함께 반환
  */
 class KoaServer {
-  private app: Koa<DefaultState, DefaultContext>;
-
+  private readonly app: Koa<DefaultState, DefaultContext>;
   private router: Router;
-
   private readonly isDevelopment: boolean;
+  private readonly systemVariables: SystemVariables;
 
   constructor() {
-    loadEnvVariables();
+    this.systemVariables = this.initValidationSystemVariable();
     this.app = new Koa();
     this.router = new Router();
     this.isDevelopment = process.env.NODE_ENV === 'development';
     setLogLevel(this.isDevelopment ? 'DEBUG' : 'ERROR');
+  }
+
+  getSystemVariables(): SystemVariables {
+    return this.systemVariables;
+  }
+
+  getDatabaseVariables(): ConnectionConfig {
+    return {
+      host: this.systemVariables.dbHost,
+      user: this.systemVariables.dbUser,
+      password: this.systemVariables.dbPassword,
+      port: this.systemVariables.dbPort,
+    };
   }
 
   setRouter(): this {
@@ -60,11 +77,40 @@ class KoaServer {
     }
     this.app.listen(port, runCb);
   }
+
+  initValidationSystemVariable(): SystemVariables {
+    loadEnvVariables();
+    const schema = Joi.object<SystemVariables>({
+      mode: Joi.string(),
+      serverPort: Joi.number(),
+      dbPort: Joi.number(),
+      dbHost: Joi.string(),
+      dbName: Joi.string(),
+      dbPassword: Joi.string(),
+      dbUser: Joi.string(),
+    });
+    const systemValues: Partial<SystemVariables> = {
+      mode: process.env.NODE_ENV,
+      serverPort: process.env.SERVER_PORT as NumberVariables,
+      dbPort: process.env.DB_PORT as NumberVariables,
+      dbHost: process.env.DB_HOST,
+      dbPassword: process.env.DB_PASSWORD,
+      dbName: process.env.DB_NAME,
+      dbUser: process.env.DB_USER,
+    };
+
+    const { value, error } = schema.validate(systemValues);
+
+    if (error) {
+      throw Error(`💥 cannot read system variables 💥 \n${error}`);
+    }
+    return value as SystemVariables;
+  }
 }
 
 /**
  * @desc KoaServer 인스턴스의 Factory Function
  */
 export default function getKoaServer(): KoaServer {
-  return new KoaServer().setLogger().setParser().setRouter();
+  return new KoaServer();
 }
