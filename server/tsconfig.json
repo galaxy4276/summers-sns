@@ -27,9 +27,10 @@
       "@config/*": ["src/config/*"],
       "@middlewares/*": ["src/middlewares/*"],
       "@services/*": [".src/services/*"],
-      "@test/*": ["test/*"]
+      "@test/*": ["test/*"],
+      "@typings/*": ["typings/*"]
     }
   },
-  "include": ["src/**/*", "test/**/*"],
+  "include": ["src/**/*", "test/**/*", "typings"],
   "exclude": ["node_modules", "build"]
 }
