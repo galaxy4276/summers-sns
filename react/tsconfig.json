@@ -17,7 +17,7 @@
     "isolatedModules": false,
     "sourceMap": true,
     "esModuleInterop": true,
-    "baseUrl": "./",
+    "baseUrl": ".",
     "incremental": true,
     "noFallthroughCasesInSwitch": true,
     "jsx": "react-jsx",
