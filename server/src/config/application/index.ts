@@ -81,13 +81,13 @@ class KoaServer {
   initValidationSystemVariable(): SystemVariables {
     loadEnvVariables();
     const schema = Joi.object<SystemVariables>({
-      mode: Joi.string(),
-      serverPort: Joi.number(),
-      dbPort: Joi.number(),
-      dbHost: Joi.string(),
-      dbName: Joi.string(),
-      dbPassword: Joi.string(),
-      dbUser: Joi.string(),
+      mode: Joi.string().required(),
+      serverPort: Joi.number().required(),
+      dbPort: Joi.number().required(),
+      dbHost: Joi.string().required(),
+      dbName: Joi.string().required(),
+      dbPassword: Joi.string().required(),
+      dbUser: Joi.string().required(),
     });
     const systemValues: Partial<SystemVariables> = {
       mode: process.env.NODE_ENV,
