@@ -15,7 +15,7 @@ const jestConfig: Config.InitialOptions = {
     '^@middlewares/(.*)$': '<rootDir>/src/middlewares/$1',
     '^@services/(.*)$': '<rootDir>/src/services/$1',
     '^@test/(.*)$': '<rootDir>/test/$1',
-
+    '^@typings/(.*)$': '<rootDir>/typings/$1',
   },
 };
 

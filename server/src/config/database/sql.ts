@@ -1,8 +1,11 @@
 import { Connection } from 'mariadb';
 
 const createDatabaseSqlIfNotExists = () =>
-  `CREATE DATABASE IF NOT EXISTS \`summers-sns\` DEFAULT CHARACTER SET utf8mb4
-COLLATE utf8mb4_general_ci;`;
+  `
+    CREATE DATABASE IF NOT EXISTS \`summers-sns\`
+      DEFAULT CHARACTER SET utf8mb4
+      COLLATE utf8mb4_general_ci;
+  `;
 
 const createUserTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`users\`
