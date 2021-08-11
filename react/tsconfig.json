@@ -17,6 +17,7 @@
     "isolatedModules": false,
     "sourceMap": true,
     "esModuleInterop": true,
+    "jsxImportSource": "react",
     "baseUrl": ".",
     "incremental": true,
     "noFallthroughCasesInSwitch": true,
@@ -26,6 +27,7 @@
       "@components/*": ["./src/components/*"],
       "@domain/*": ["./src/domain/*"],
       "@services/*": ["./src/services/*"],
+      "@public/*": ["./src/public/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@test/*": ["./test/*"]
     }
