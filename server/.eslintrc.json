@@ -22,7 +22,9 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "prettier/prettier": "error"
+        "prettier/prettier": "error",
+        "@typescript-eslint/lines-between-class-members": "off",
+        "class-methods-use-this": "off"
     },
     "ignorePatterns": ["jest.config.ts", "build"]
 }
