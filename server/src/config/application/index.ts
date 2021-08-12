@@ -10,6 +10,7 @@ import { SystemVariables } from '@typings/system';
 import { ConnectionConfig } from 'mariadb';
 import { Document, loadDocumentSync } from 'swagger2';
 import { ui } from 'swagger2-koa';
+import rootRouter from '@api/index';
 
 type NumberVariables = number | undefined;
 
@@ -27,7 +28,7 @@ class KoaServer {
     this.swaggerDocument = this.getInitSwaggerDocumentation();
     this.systemVariables = this.getInitValidationSystemVariable();
     this.app = new Koa();
-    this.router = new Router();
+    this.router = rootRouter;
     this.isDevelopment = process.env.NODE_ENV === 'development';
     setLogLevel(this.isDevelopment ? 'DEBUG' : 'ERROR');
   }
@@ -54,7 +55,7 @@ class KoaServer {
 
   setRouter(): this {
     this.app.use(this.router.routes());
-    this.router.prefix('/api');
+    this.app.use(this.router.allowedMethods());
     return this;
   }
 
