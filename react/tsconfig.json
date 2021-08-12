@@ -17,7 +17,7 @@
     "isolatedModules": false,
     "sourceMap": true,
     "esModuleInterop": true,
-    "jsxImportSource": "react",
+    "jsxImportSource": "@emotion/react",
     "baseUrl": ".",
     "incremental": true,
     "noFallthroughCasesInSwitch": true,
@@ -29,9 +29,10 @@
       "@services/*": ["./src/services/*"],
       "@public/*": ["./src/public/*"],
       "@hooks/*": ["./src/hooks/*"],
-      "@test/*": ["./test/*"]
+      "@test/*": ["./test/*"],
+      "@typings/*": ["./typings/*"]
     }
   },
-  "include": ["src/**/*", "*.ts", "test/**/*"],
+  "include": ["src/**/*", "*.ts", "test/**/*", "typings/**/*", "custom.d.ts"],
   "exclude": ["node_modules", "build"]
 }

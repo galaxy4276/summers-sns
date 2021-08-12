@@ -16,12 +16,13 @@ const WebpackConfig: Configuration = {
     extensions: ['.tsx', '.ts', '.js'],
     alias: {
       "@app": resolve(__dirname, 'src/app/'),
-      "@config": resolve(__dirname, 'src/config/'),
+      "@components": resolve(__dirname, 'src/components/'),
       "@domain": resolve(__dirname, 'src/domain/'),
       "@hooks": resolve(__dirname, 'src/hooks/'),
       "@public": resolve(__dirname, 'src/public/'),
       "@services": resolve(__dirname, 'src/services/'),
-      "@test": resolve(__dirname, 'test/')
+      '@test': resolve(__dirname, 'test/'),
+      "@typings": resolve(__dirname, 'typings/')
     },
   },
   devServer: {
@@ -57,8 +58,12 @@ const WebpackConfig: Configuration = {
       {
         test: /\.(css|scss)$/,
         use: ["style-loader", "css-loader"]
-      }
-    ]
+      },
+      {
+        test: /\.svg$/,
+        use: ['@svgr/webpack'],
+      },
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({
