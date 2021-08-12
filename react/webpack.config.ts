@@ -16,10 +16,13 @@ const WebpackConfig: Configuration = {
     extensions: ['.tsx', '.ts', '.js'],
     alias: {
       "@app": resolve(__dirname, 'src/app/'),
-      "@config": resolve(__dirname, '/src/config/'),
-      "@middlewares": resolve(__dirname, '/src/middlewares/'),
-      "@services": resolve(__dirname, '/src/services/'),
-      "@test": resolve(__dirname, '/test/')
+      "@components": resolve(__dirname, 'src/components/'),
+      "@domain": resolve(__dirname, 'src/domain/'),
+      "@hooks": resolve(__dirname, 'src/hooks/'),
+      "@public": resolve(__dirname, 'src/public/'),
+      "@services": resolve(__dirname, 'src/services/'),
+      '@test': resolve(__dirname, 'test/'),
+      "@typings": resolve(__dirname, 'typings/')
     },
   },
   devServer: {
@@ -27,7 +30,7 @@ const WebpackConfig: Configuration = {
     hot: true,
     compress: true,
     historyApiFallback: true,
-    port: 3000
+    port: 3000,
   },
   module: {
     rules: [
@@ -39,13 +42,28 @@ const WebpackConfig: Configuration = {
       {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
-        use: ["swc-loader"]
+        use: {
+          loader: 'swc-loader',
+          options: {
+            jsc: {
+              parser: {
+                syntax: 'typescript',
+                dynamicImport: true,
+                tsx: true,
+              },
+            },
+          },
+        },
       },
       {
         test: /\.(css|scss)$/,
         use: ["style-loader", "css-loader"]
-      }
-    ]
+      },
+      {
+        test: /\.svg$/,
+        use: ['@svgr/webpack'],
+      },
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({

@@ -1,5 +1,8 @@
 {
   "presets": [
+    [
+      "@emotion/babel-preset-css-prop", { "runtime": "automatic" }
+    ],
     "@emotion",
     "@babel/preset-env",
     "@babel/react",
