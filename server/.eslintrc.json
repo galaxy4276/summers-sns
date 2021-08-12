@@ -24,7 +24,8 @@
     "rules": {
         "prettier/prettier": "error",
         "@typescript-eslint/lines-between-class-members": "off",
-        "class-methods-use-this": "off"
+        "class-methods-use-this": "off",
+        "consistent-return": "off"
     },
     "ignorePatterns": ["jest.config.ts", "build"]
 }
