@@ -37,6 +37,8 @@
     "koa-router": "^10.0.0",
     "loglevel": "^1.7.1",
     "mariadb": "^2.5.4",
+    "swagger2": "^3.0.0",
+    "swagger2-koa": "^3.0.0",
     "ts-node": "^10.2.0",
     "typescript": "^4.3.5"
   },
