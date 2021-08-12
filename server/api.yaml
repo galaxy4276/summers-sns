@@ -1,0 +1,9 @@
+swagger: "2.0"
+info:
+  title: "Summers APIs"
+  description: >
+    summers-sns api
+  version: "1.0.0"
+host: "localhost:8080"
+schemes:
+  - "http"
