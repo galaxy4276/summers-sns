@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/galaxy4276/summers-sns#readme",
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
     "jest": "^27.0.6",
     "joi": "^17.4.2",
@@ -43,6 +44,7 @@
     "typescript": "^4.3.5"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
     "@types/jest": "^26.0.24",
     "@types/koa": "^2.13.4",
     "@types/koa-morgan": "^1.0.5",

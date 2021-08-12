@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { getDatabasePool, getTestServer } from '@test/app';
+import getTestServer from '@test/app';
 import { DatabaseConnection } from '@config/database';
 import { Server } from 'http';
 
@@ -8,8 +8,9 @@ describe('서버 환경 테스트', () => {
   let pool: DatabaseConnection;
 
   beforeAll(async () => {
-    app = getTestServer();
-    pool = await getDatabasePool();
+    const [testServer, dbPool] = await getTestServer();
+    app = testServer;
+    pool = dbPool;
   });
 
   afterAll(async () => {
