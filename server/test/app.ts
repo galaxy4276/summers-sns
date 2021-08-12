@@ -1,13 +1,18 @@
-import getKoaServer from '@config/application';
-import { DatabaseConnection, getDatabaseConnection } from '@config/database';
+import {
+  getKoaServer,
+  getDatabaseConnection,
+  DatabaseConnection,
+} from '@config/index';
 import { Server } from 'http';
 
-export function getTestServer(): Server {
-  return getKoaServer().setParser().setRouter().getServer().listen(8080);
-}
-
-export async function getDatabasePool(): Promise<DatabaseConnection> {
+/**
+ * @desc 테스트용 서버와 데이터베이스 인스턴스를 초기화 후, 반환합니다.
+ */
+export default async function getTestServer(): Promise<
+  [Server, DatabaseConnection]
+> {
+  const testServer = getKoaServer().setParser().setRouter();
   const pool = getDatabaseConnection();
-  await pool.connect();
-  return pool;
+  await pool.connect(testServer.getDatabaseVariables());
+  return [testServer.getServer().listen(8080), pool];
 }
