@@ -5,4 +5,17 @@ export interface SignInProps {
   password: string;
 }
 
+export interface AllUserProps {
+  id: number;
+  email: string;
+  realname: string;
+  username: string;
+  password: string;
+  follower_count: number;
+  follwing_count: number;
+  created_at: Date;
+  updated_at: Date;
+  deleted_at?: Date;
+}
+
 export default {};
