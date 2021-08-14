@@ -6,12 +6,12 @@ export const validateSignInForm = (form: SignInProps): void => {
     email: Joi.string().email().required(),
     realname: Joi.string().min(3).max(30).required(),
     username: Joi.string().min(3).max(10).required(),
-    password: Joi.string().max(50),
+    password: Joi.string().min(8).max(50).required(),
   });
 
   const { error } = schema.validate(form);
   if (error) {
-    throw new Error(error.message);
+    throw new Error(`${error.message}(joi)`);
   }
 };
 
