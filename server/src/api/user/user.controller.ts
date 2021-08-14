@@ -28,7 +28,7 @@ export const signInController = async (
     const createdUser = await createUser(form);
     ctx.response.status = 201;
     ctx.body = {
-      message: `${createdUser.username} 유저가 생성되었습니다.`,
+      message: `${createdUser?.username} 유저가 생성되었습니다.`,
     };
   } catch (err) {
     if (err.message.includes('joi')) {

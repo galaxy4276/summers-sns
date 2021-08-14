@@ -6,7 +6,7 @@ import { SignInProps } from '@typings/user';
 
 describe('인증 테스트', () => {
   let app: Server;
-  let pool: DatabaseConnection;
+  let mariadb: DatabaseConnection;
   let form: SignInProps;
 
   beforeAll(async () => {
@@ -18,12 +18,12 @@ describe('인증 테스트', () => {
     };
     const [testServer, dbPool] = await getTestServer();
     app = testServer;
-    pool = dbPool;
+    mariadb = dbPool;
   });
 
   afterAll(async () => {
     app.close();
-    await pool.getConnection().end();
+    await mariadb.pool.end();
   });
 
   describe('회원가입 테스트', () => {
@@ -147,6 +147,30 @@ describe('인증 테스트', () => {
           .then(({ statusCode }) => {
             expect(statusCode).toBe(400);
           });
+      });
+    });
+
+    describe('회원가입 기능 테스트', () => {
+      it('테스트 계정이 회원가입 된다.', async () => {
+        await request(app)
+          .post('/api/user')
+          .send(form)
+          .then(({ statusCode }) => {
+            expect(statusCode).toBe(201);
+          });
+      });
+
+      it('이미 가입된 대상은 가입되지 않는다.', async () => {
+        await request(app)
+          .post('/api/user')
+          .send(form)
+          .then(({ statusCode }) => {
+            expect(statusCode).toBe(400);
+          });
+        const conn = await mariadb.pool.getConnection();
+        await conn.query('DELETE FROM `summers-sns`.users WHERE email = ?', [
+          form.email,
+        ]);
       });
     });
   });

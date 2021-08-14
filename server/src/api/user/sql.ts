@@ -1,11 +1,10 @@
 import { AllUserProps, SignInProps } from '@typings/user';
-import { databaseConnection } from '@config/index';
-import { getBoolAnyQueryPromise } from '../../services'; // TODO: Path 수정
+import { mariadb } from '@config/index';
+import { getBoolAnyQueryPromise } from '../../services';
 
 export const createUser = async (form: SignInProps): Promise<AllUserProps> => {
+  const conn = await mariadb.pool.getConnection();
   try {
-    const conn = databaseConnection.getConnection();
-    await conn.beginTransaction();
     const { email, realname, username, password } = form;
     const { insertId }: { insertId: number } = await conn.query(
       `
@@ -22,7 +21,6 @@ export const createUser = async (form: SignInProps): Promise<AllUserProps> => {
       ])
     )[0] as AllUserProps;
   } catch (err) {
-    await databaseConnection.getConnection().rollback();
     throw new Error(err);
   }
 };
@@ -31,7 +29,7 @@ export const checkPrevUser = async (
   username: string,
   email: string,
 ): Promise<string | void> => {
-  const conn = databaseConnection.getConnection();
+  const conn = await mariadb.pool.getConnection();
   const isUsername = await getBoolAnyQueryPromise(
     conn.query(
       `

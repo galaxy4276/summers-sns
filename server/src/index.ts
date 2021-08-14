@@ -1,6 +1,7 @@
 import { debug as log } from 'loglevel';
 import { Context } from 'koa';
-import { getKoaServer, databaseConnection } from '@config/index';
+import { getKoaServer } from '@config/index';
+import conn from '@config/database';
 
 const errorCb = (err: Error, ctx: Context): void => {
   log(`statusCode::${ctx.status}`);
@@ -15,10 +16,7 @@ async function main(): Promise<void> {
     .setParser()
     .setRouter()
     .setErrorHandler(errorCb);
-  await databaseConnection
-    .connect(koa.getDatabaseVariables())
-    .then(() => log('Database Connected'));
-  await databaseConnection.initialize();
+  await conn.initialize();
   koa.run(() => log(`listening on ${process.env.SERVER_PORT}...`));
 }
 
