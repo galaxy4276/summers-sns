@@ -13,6 +13,5 @@ export default async function getTestServer(): Promise<
 > {
   const testServer = getKoaServer().setParser().setRouter();
   const pool = getDatabaseConnection();
-  await pool.connect(testServer.getDatabaseVariables());
-  return [testServer.getServer().listen(8080), pool];
+  return [testServer.getServer().listen(8081), pool];
 }

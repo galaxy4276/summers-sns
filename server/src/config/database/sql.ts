@@ -1,4 +1,4 @@
-import { Connection } from 'mariadb';
+import { Pool } from 'mariadb';
 
 const createDatabaseSqlIfNotExists = () =>
   `
@@ -140,7 +140,7 @@ const createAdminTableSql = () =>
      CONSTRAINT pk_user_admins PRIMARY KEY(id)
   );`;
 
-const createDatabaseIfNotExists = async (conn: Connection): Promise<void> => {
+const createDatabaseIfNotExists = async (conn: Pool): Promise<void> => {
   await conn.query(createDatabaseSqlIfNotExists());
   await conn.query(createUserTableSql());
   await conn.query(createPostTableSql());

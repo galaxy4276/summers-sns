@@ -1,27 +1,43 @@
-import { Context } from 'koa';
-import { debug as log } from 'loglevel';
+import { Context, Next } from 'koa';
 import { validateSignInForm } from '@api/user/schema';
 import { SignInProps } from '@typings/user';
-import { createUserSql } from '@api/user/sql';
-import hashPlain from '../../services/hashPlain';
+import { checkPrevUser, createUser } from '@api/user/sql';
+import { hashPlainText } from '@services/index';
 
-// TODO: username 중복 예외 처리
-export const signInController = async (ctx: Context): Promise<void> => {
+export const signInController = async (
+  ctx: Context,
+  next: Next,
+): Promise<void> => {
   try {
-    log('회원가입 컨트롤러');
     const signInForm: SignInProps = ctx.request.body;
     validateSignInForm(signInForm);
-    const password = await hashPlain(signInForm.password, 10);
+    const { username, email, password: plainPassword } = signInForm;
+    const errMessage = await checkPrevUser(username, email);
+    if (errMessage) {
+      ctx.response.status = 400;
+      ctx.body = {
+        message: errMessage,
+      };
+      return await next();
+    }
+    const password = await hashPlainText(plainPassword, 10);
     const form = {
       ...signInForm,
       password,
     };
-    const username = await createUserSql(form);
+    const createdUser = await createUser(form);
+    ctx.response.status = 201;
     ctx.body = {
-      message: `${username} 유저가 생성되었습니다.`,
+      message: `${createdUser?.username} 유저가 생성되었습니다.`,
     };
   } catch (err) {
-    log(err);
+    if (err.message.includes('joi')) {
+      ctx.response.status = 400;
+      ctx.body = {
+        message: err.message,
+      };
+      return next();
+    }
     throw new Error(err);
   }
 };
