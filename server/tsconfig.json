@@ -27,7 +27,7 @@
       "@api/*": ["src/api/*"],
       "@config/*": ["src/config/*"],
       "@middlewares/*": ["src/middlewares/*"],
-      "@services/*": [".src/services/*"],
+      "@services/*": ["src/services/*"],
       "@test/*": ["test/*"],
       "@typings/*": ["typings/*"]
     }
