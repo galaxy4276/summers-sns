@@ -6,4 +6,5 @@ export interface SystemVariables {
   dbPassword: string;
   dbName: string;
   dbPort: number;
+  sessionKey: string;
 }
