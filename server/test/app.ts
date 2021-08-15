@@ -11,7 +11,10 @@ import { Server } from 'http';
 export default async function getTestServer(): Promise<
   [Server, DatabaseConnection]
 > {
-  const testServer = getKoaServer().setParser().setRouter();
+  const testServer = getKoaServer()
+    .setParser()
+    .setAuthMiddlewares()
+    .setRouter();
   const pool = getDatabaseConnection();
   return [testServer.getServer().listen(8081), pool];
 }
