@@ -14,6 +14,7 @@ async function main(): Promise<void> {
     .setSwaggerUi()
     .setLogger()
     .setParser()
+    .setAuthMiddlewares()
     .setRouter()
     .setErrorHandler(errorCb);
   await conn.initialize();
