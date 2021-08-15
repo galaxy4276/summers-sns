@@ -5,17 +5,17 @@ import { Server } from 'http';
 
 describe('서버 환경 테스트', () => {
   let app: Server;
-  let pool: DatabaseConnection;
+  let mariadb: DatabaseConnection;
 
   beforeAll(async () => {
     const [testServer, dbPool] = await getTestServer();
     app = testServer;
-    pool = dbPool;
+    mariadb = dbPool;
   });
 
   afterAll(async () => {
     app.close();
-    await pool.getConnection().end();
+    await mariadb.pool.end();
   });
 
   it('서버가 정상적으로 실행 된다.', async () => {
@@ -26,7 +26,8 @@ describe('서버 환경 테스트', () => {
       });
   });
 
-  it('데이터베이스가 정상적으로 연결된다.', () => {
-    expect(pool.getConnection().isValid()).toBeTruthy();
+  it('데이터베이스가 정상적으로 연결된다.', async () => {
+    const conn = await mariadb.pool.getConnection();
+    expect(conn.isValid()).toBeTruthy();
   });
 });
