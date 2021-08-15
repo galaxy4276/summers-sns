@@ -1,5 +1,12 @@
-export interface SignInProps {
+export interface EmailSignInProps {
   email: string;
+  realname: string;
+  username: string;
+  password: string;
+}
+
+export interface PhoneSignInProps {
+  phone: string;
   realname: string;
   username: string;
   password: string;
