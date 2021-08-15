@@ -11,7 +11,8 @@ const createUserTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`users\`
   (
      id              INT(11) AUTO_INCREMENT NOT NULL,
-     email           VARCHAR(255) NOT NULL,
+     email           VARCHAR(255) NULL,
+     phone           VARCHAR(40) NULL,
      realname        VARCHAR(30) NOT NULL,
      username        VARCHAR(30) UNIQUE NOT NULL,
      password        VARCHAR(255) NOT NULL,

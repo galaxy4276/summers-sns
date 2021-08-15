@@ -11,6 +11,7 @@ import { ConnectionConfig } from 'mariadb';
 import { Document, loadDocumentSync } from 'swagger2';
 import { ui } from 'swagger2-koa';
 import rootRouter from '@api/index';
+import session from 'koa-session';
 
 type NumberVariables = number | undefined;
 
@@ -31,6 +32,18 @@ class KoaServer {
     this.router = rootRouter;
     this.isDevelopment = process.env.NODE_ENV === 'development';
     setLogLevel(this.isDevelopment ? 'DEBUG' : 'ERROR');
+  }
+
+  setAuthMiddlewares(): this {
+    this.app.use(
+      session(
+        {
+          key: this.systemVariables.sessionKey,
+        },
+        this.app,
+      ),
+    );
+    return this;
   }
 
   getSystemVariables(): SystemVariables {
@@ -101,6 +114,7 @@ class KoaServer {
       dbName: Joi.string().required(),
       dbPassword: Joi.string().required(),
       dbUser: Joi.string().required(),
+      sessionKey: Joi.string().required(),
     });
     const systemValues: Partial<SystemVariables> = {
       mode: process.env.NODE_ENV,
@@ -110,6 +124,7 @@ class KoaServer {
       dbPassword: process.env.DB_PASSWORD,
       dbName: process.env.DB_NAME,
       dbUser: process.env.DB_USER,
+      sessionKey: process.env.SESSION_KEY,
     };
 
     const { value, error } = schema.validate(systemValues);
