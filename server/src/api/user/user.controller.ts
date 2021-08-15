@@ -1,17 +1,17 @@
 import { Context, Next } from 'koa';
 import {
-  isSignInEmailForm,
-  isSignInPhoneForm,
-  validateSignInFormEmail,
-  validateSignInFormPhone,
-} from '@api/user/validate';
-import {
   checkPrevUserByEmail,
   checkPrevUserByPhone,
   createUserByEmail,
   createUserByPhone,
 } from '@api/user/sql';
 import { hashPlainText } from '@services/index';
+import {
+  isSignInEmailForm,
+  isSignInPhoneForm,
+  validateSignInFormEmail,
+  validateSignInFormPhone,
+} from './validate';
 
 /**
  * @desc 사용자를 검증하고 회원가입 로직을 수행하는 컨트롤러
@@ -27,6 +27,7 @@ export const signInController = async (
     if (isEmail) {
       const { username, email } = validateSignInFormEmail(signInForm);
       const emailError = await checkPrevUserByEmail(username, email);
+      ctx.response.status = 400;
       if (emailError) {
         ctx.body = {
           message: emailError,
@@ -37,7 +38,7 @@ export const signInController = async (
     if (isPhone) {
       const { username, phone } = validateSignInFormPhone(signInForm);
       const phoneError = await checkPrevUserByPhone(username, phone);
-      console.log({ phoneError });
+      ctx.response.status = 400;
       if (phoneError) {
         ctx.body = {
           message: phoneError,
