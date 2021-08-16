@@ -87,6 +87,7 @@ export const sendSecurityCodeController = async (
     if (email) {
       const id = await getUserVerifiesIdByEmail(ctx, email);
       if (!id) return await next();
+      await setUserVerifiesKey(id, civ);
       await sendSecurityCodeEmail(email, civ);
       ctx.body = {
         message: `${email} 으로 인증코드를 발송하였습니다.`,
