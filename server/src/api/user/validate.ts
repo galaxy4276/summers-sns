@@ -7,11 +7,7 @@ import {
 import Joi from 'joi';
 import { Context } from 'koa';
 import { checkPrevUserProps, getBoolCheckPrevUserRole } from '@api/user/sql';
-import {
-  isSignInEmailForm,
-  isSignInPhoneForm,
-  ValidateUserReturnProps,
-} from '@api/user/types';
+import { isSignInEmailForm, isSignInPhoneForm } from '@api/user/types';
 
 /**
  * @desc 이메일 회원가입 폼 검증 함수
@@ -100,10 +96,9 @@ export const validateUserRole = async (
 export const validateUser = async (
   ctx: Context,
   form: EmailSignInProps | PhoneSignInProps,
-): Promise<ValidateUserReturnProps> => {
+): Promise<boolean> => {
   const isEmail = isSignInEmailForm(form);
   const isPhone = isSignInPhoneForm(form);
-  const returnDraft = { isError: true, isEmail, isPhone };
   if (isEmail) {
     const { username, email } = validateSignInFormEmail(
       form as EmailSignInProps,
@@ -119,7 +114,7 @@ export const validateUser = async (
       ctx.body = {
         message: emailError,
       };
-      return returnDraft;
+      return true;
     }
   }
 
@@ -138,11 +133,11 @@ export const validateUser = async (
       ctx.body = {
         message: phoneError,
       };
-      return returnDraft;
+      return true;
     }
   }
 
-  return { ...returnDraft, isError: false };
+  return false;
 };
 
 /**

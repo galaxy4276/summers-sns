@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import { createUserRoleController, signInController } from './user.controller';
+import { createUserRoleController, signInController } from './controller';
 
 const userRouter = new Router({ prefix: '/user' });
 
