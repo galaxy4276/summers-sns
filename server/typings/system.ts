@@ -7,4 +7,10 @@ export interface SystemVariables {
   dbName: string;
   dbPort: number;
   sessionKey: string;
+  twilioAccountSid: string;
+  twilioAuthToken: string;
+  twilioPhone: string;
+  emailHost: string;
+  emailUser: string;
+  emailPassword: string;
 }
