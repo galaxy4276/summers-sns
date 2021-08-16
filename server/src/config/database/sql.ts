@@ -141,6 +141,16 @@ const createAdminTableSql = () =>
      CONSTRAINT pk_user_admins PRIMARY KEY(id)
   );`;
 
+const createUserVerifyTableSql = () =>
+  `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`user_verifies\`
+   (
+     id              INT(11) AUTO_INCREMENT NOT NULL,
+     email           VARCHAR(255) UNIQUE NULL,
+     phone           VARCHAR(40) UNIQUE NULL,
+     is_verified     BOOLEAN NOT NULL DEFAULT false,
+     CONSTRAINT pk_user_verified PRIMARY KEY(id)
+   );`;
+
 const createDatabaseIfNotExists = async (conn: Pool): Promise<void> => {
   await conn.query(createDatabaseSqlIfNotExists());
   await conn.query(createUserTableSql());
@@ -153,6 +163,7 @@ const createDatabaseIfNotExists = async (conn: Pool): Promise<void> => {
   await conn.query(createUploadFileTableSql());
   await conn.query(createUserRoleTableSql());
   await conn.query(createAdminTableSql());
+  await conn.query(createUserVerifyTableSql());
 };
 
 export default createDatabaseIfNotExists;
