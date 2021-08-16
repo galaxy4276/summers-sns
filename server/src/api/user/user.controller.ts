@@ -8,6 +8,20 @@ import { hashPlainText } from '@services/index';
 import { validateUser, validateUserRole } from './validate';
 
 /**
+ * @desc Joi 관련 에러를 ctx.body 에 넣어주고, next 반환 유무를 bool 값으로 반환한다.
+ */
+export const handlingJoiError = (ctx: Context, err: Error): boolean => {
+  if (err.message.includes('joi')) {
+    ctx.body = {
+      message: err.message,
+    };
+    ctx.response.status = 400;
+    return true;
+  }
+  return false;
+};
+
+/**
  * @desc 사용자를 검증하고 회원가입 로직을 수행하는 컨트롤러
  */
 export const signInController = async (
@@ -39,13 +53,8 @@ export const signInController = async (
     ctx.response.status = 201;
     return await next();
   } catch (err) {
-    if (err.message.includes('joi')) {
-      ctx.response.status = 400;
-      ctx.body = {
-        message: err.message,
-      };
-      return next();
-    }
+    const isJoi = handlingJoiError(ctx, err);
+    if (isJoi) return next();
     throw new Error(err);
   }
 };
@@ -57,17 +66,23 @@ export const createUserRoleController = async (
   ctx: Context,
   next: Next,
 ): Promise<void> => {
-  const signInForm = ctx.request.body;
-  const isPrevious = await validateUserRole(ctx, signInForm);
-  if (isPrevious) return next();
+  try {
+    const signInForm = ctx.request.body;
+    const isPrevious = await validateUserRole(ctx, signInForm);
+    if (isPrevious) return await next();
 
-  const createdRoleId = await createUserRole(
-    signInForm.email,
-    signInForm.phone,
-  );
+    const createdRoleId = await createUserRole(
+      signInForm.email,
+      signInForm.phone,
+    );
 
-  ctx.body = {
-    createdRoleId,
-  };
-  return next();
+    ctx.body = {
+      createdRoleId,
+    };
+    return await next();
+  } catch (err) {
+    const isJoi = handlingJoiError(ctx, err);
+    if (isJoi) return next();
+    throw new Error(err);
+  }
 };
