@@ -54,12 +54,35 @@ export const validateSignInFormPhone = (
 };
 
 /**
+ * @desc 이메일로 가입하는 사용자 인증 정보 생성 폼 검증 함수
+ */
+const validateUserRoleFormEmail = (form: EmailUserRole) => {
+  const { error } = Joi.object<EmailUserRole>({
+    email: Joi.string().email().required(),
+  }).validate(form);
+  if (error) throw new Error(`${error.message}(joi)`);
+};
+
+/**
+ * @desc 번호로 가입하는 사용자 인증 정보 생성 폼 검증 함수
+ */
+const validateUserRoleFormPhone = (form: PhoneUserRole) => {
+  const { error } = Joi.object<PhoneUserRole>({
+    phone: Joi.string().max(40).required(),
+  }).validate(form);
+  if (error) throw new Error(`${error.message}(joi)`);
+};
+
+/**
  * @desc 사용자 인증 정보가 존재하는지 bool 값으로 반환합니다.
  */
 export const validateUserRole = async (
   ctx: Context,
   form: EmailUserRole | PhoneUserRole,
 ): Promise<boolean> => {
+  if ('email' in form) validateUserRoleFormEmail(form);
+  if ('phone' in form) validateUserRoleFormPhone(form);
+
   const previousError = await getBoolCheckPrevUserRole(form);
   if (previousError) {
     ctx.body = {
