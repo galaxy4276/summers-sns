@@ -11,12 +11,3 @@ export const isSignInPhoneForm = (
 ): form is PhoneSignInProps => {
   return (<PhoneSignInProps>form).phone !== undefined;
 };
-
-/**
- * @desc validateUser 함수에 대한 반환 타입
- */
-export interface ValidateUserReturnProps {
-  isError: boolean;
-  isEmail: boolean;
-  isPhone: boolean;
-}
