@@ -25,4 +25,12 @@ export interface AllUserProps {
   deleted_at?: Date;
 }
 
+export interface EmailUserRole {
+  email: string;
+}
+
+export interface PhoneUserRole {
+  phone: string;
+}
+
 export default {};
