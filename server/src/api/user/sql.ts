@@ -4,6 +4,7 @@ import {
   EmailUserRole,
   PhoneSignInProps,
   PhoneUserRole,
+  UserRole,
 } from '@typings/user';
 import { mariadb } from '@config/index';
 import { getBoolAnyQueryPromise } from '../../services';
@@ -161,4 +162,50 @@ export const getBoolCheckPrevUserRole = async (
     );
     if (isPrevPhone) return '이미 가입된 번호입니다.';
   }
+};
+
+/**
+ * @desc 해당 번호를 가진 user_verifies 항목의 아이디를 가져오는 Sql 을 실행합니다.
+ * @return userRole 타입의 객체를 반환합니다.
+ */
+export const getUserVerifiesIdByPhoneSql = async (
+  phone: string,
+): Promise<UserRole> => {
+  const conn = await mariadb.pool.getConnection();
+  const queryResult = await conn.query(
+    `SELECT * FROM \`summers-sns\`.user_verifies WHERE phone = ?`,
+    [phone],
+  );
+  return queryResult[0] as UserRole;
+};
+
+/**
+ * @desc 해당 이메일을 가진 user_verifies 항목의 아이디를 가져오는 Sql 을 실행합니다.
+ * @return userRole 타입의 객체를 반환합니다.
+ */
+export const getUserVerifiesIdByEmailSql = async (
+  email: string,
+): Promise<UserRole> => {
+  const conn = await mariadb.pool.getConnection();
+  const queryResult = await conn.query(
+    'SELECT * FROM `summers-sns`.user_verifies WHERE email = ?',
+    [email],
+  );
+  await conn.end();
+  return queryResult[0] as UserRole;
+};
+
+/**
+ * @desc 사용자 인증 정보에 암호 키를 추가 저장합니다.
+ */
+export const setUserVerifiesKey = async (
+  id: number,
+  civ: string,
+): Promise<void> => {
+  const conn = await mariadb.pool.getConnection();
+  await conn.query(
+    `UPDATE \`summers-sns\`.user_verifies SET civ_key = ? WHERE id = ?`,
+    [civ, id],
+  );
+  await conn.end();
 };
