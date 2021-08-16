@@ -1,6 +1,21 @@
-import { EmailSignInProps, PhoneSignInProps } from '@typings/user';
+import {
+  EmailSignInProps,
+  EmailUserRole,
+  PhoneSignInProps,
+  PhoneUserRole,
+} from '@typings/user';
 import Joi from 'joi';
+import { Context } from 'koa';
+import { checkPrevUserProps, getBoolCheckPrevUserRole } from '@api/user/sql';
+import {
+  isSignInEmailForm,
+  isSignInPhoneForm,
+  ValidateUserReturnProps,
+} from '@api/user/types';
 
+/**
+ * @desc 이메일 회원가입 폼 검증 함수
+ */
 export const validateSignInFormEmail = (
   form: EmailSignInProps,
 ): EmailSignInProps => {
@@ -18,6 +33,9 @@ export const validateSignInFormEmail = (
   return value as EmailSignInProps;
 };
 
+/**
+ * @desc 폰 번호 회원가입 폼 검증 함수
+ */
 export const validateSignInFormPhone = (
   form: PhoneSignInProps,
 ): PhoneSignInProps => {
@@ -35,16 +53,76 @@ export const validateSignInFormPhone = (
   return value;
 };
 
-export const isSignInEmailForm = (
-  form: EmailSignInProps | PhoneSignInProps,
-): form is EmailSignInProps => {
-  return (<EmailSignInProps>form).email !== undefined;
+/**
+ * @desc 사용자 인증 정보가 존재하는지 bool 값으로 반환합니다.
+ */
+export const validateUserRole = async (
+  ctx: Context,
+  form: EmailUserRole | PhoneUserRole,
+): Promise<boolean> => {
+  const previousError = await getBoolCheckPrevUserRole(form);
+  if (previousError) {
+    ctx.body = {
+      message: previousError,
+    };
+    return true;
+  }
+  return false;
 };
 
-export const isSignInPhoneForm = (
+/**
+ * @desc 사용자 정보가 존재하는 지 bool 값으로 반환합니다.
+ */
+
+export const validateUser = async (
+  ctx: Context,
   form: EmailSignInProps | PhoneSignInProps,
-): form is PhoneSignInProps => {
-  return (<PhoneSignInProps>form).phone !== undefined;
+): Promise<ValidateUserReturnProps> => {
+  const isEmail = isSignInEmailForm(form);
+  const isPhone = isSignInPhoneForm(form);
+  const returnDraft = { isError: true, isEmail, isPhone };
+  if (isEmail) {
+    const { username, email } = validateSignInFormEmail(
+      form as EmailSignInProps,
+    );
+    const emailError = await checkPrevUserProps(
+      username,
+      'email',
+      email,
+      'users',
+    );
+    if (emailError) {
+      ctx.response.status = 400;
+      ctx.body = {
+        message: emailError,
+      };
+      return returnDraft;
+    }
+  }
+
+  if (isPhone) {
+    const { username, phone } = validateSignInFormPhone(
+      form as PhoneSignInProps,
+    );
+    const phoneError = await checkPrevUserProps(
+      username,
+      'phone',
+      phone,
+      'users',
+    );
+    if (phoneError) {
+      ctx.response.status = 400;
+      ctx.body = {
+        message: phoneError,
+      };
+      return returnDraft;
+    }
+  }
+
+  return { ...returnDraft, isError: false };
 };
 
-export default {};
+/**
+ * @desc 계정에 대한 인증을 수행한 사용자인 지 검사합니다.
+ */
+export const checkVerifiedUser = () => {};
