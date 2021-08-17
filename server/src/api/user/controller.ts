@@ -1,15 +1,20 @@
 import { Context, Next } from 'koa';
-import { createUserRole, setUserVerifiesKey } from '@api/user/sql';
-import { createDigit, handlingJoiError, hashPlainText } from '@services/index';
+import { createUserCredentials, setActivateUserVerifies } from '@api/user/sql';
+import { handlingJoiError, hashPlainText } from '@services/index';
 import {
   createUser,
-  getUserVerifiesIdByEmail,
-  getUserVerifiesIdByPhone,
-  sendSecurityCodeEmail,
-  sendSecurityCodeSms,
+  isBothAuthProps,
+  sendSecurityCodeByRules,
 } from '@api/user/services';
-import { validateUser, validateUserRole } from './validate';
+import {
+  isVerifiedUser,
+  isVerifySecurityCodeForm,
+  validateUser,
+  validateUserCredential,
+  verifySecurityCode,
+} from './validate';
 
+// TODO: UserRole 같이 생성해줘야 함
 /**
  * @desc 사용자를 검증하고 회원가입 로직을 수행하는 컨트롤러
  */
@@ -21,7 +26,8 @@ export const signInController = async (
     const signInForm = ctx.request.body;
     const isError = await validateUser(ctx, signInForm);
     if (isError) return await next();
-
+    const isVerified = await isVerifiedUser(ctx, signInForm);
+    if (!isVerified) return await next();
     const password = await hashPlainText(signInForm.password, 10);
     const form = {
       ...signInForm,
@@ -39,20 +45,20 @@ export const signInController = async (
 /**
  * @desc 사용자 정보를 생성하는 컨트롤러
  */
-export const createUserRoleController = async (
+export const createCredentialsController = async (
   ctx: Context,
   next: Next,
 ): Promise<void> => {
   try {
-    const signInForm = ctx.request.body;
-    const isPrevious = await validateUserRole(ctx, signInForm);
+    const credentialsForm = ctx.request.body;
+    const isPrevious = await validateUserCredential(ctx, credentialsForm);
     if (isPrevious) return await next();
-
-    const createdRoleId = await createUserRole(
-      signInForm.email,
-      signInForm.phone,
-    );
-
+    const createdRoleId = (await createUserCredentials(
+      credentialsForm.email,
+      credentialsForm.phone,
+    )) as number;
+    const { isError } = await sendSecurityCodeByRules(ctx, credentialsForm);
+    if (isError) return await next();
     ctx.body = {
       createdRoleId,
     };
@@ -72,32 +78,39 @@ export const sendSecurityCodeController = async (
   next: Next,
 ): Promise<void> => {
   try {
-    const { email, phone } = ctx.request.body;
-    const civ = createDigit(6);
-    if (phone) {
-      const id = await getUserVerifiesIdByPhone(ctx, phone);
-      if (!id) return await next();
-      await setUserVerifiesKey(id, civ);
-      await sendSecurityCodeSms(phone, civ);
-      ctx.body = {
-        message: `${phone} 으로 인증코드를 발송하였습니다.`,
-      };
-    }
-
-    if (email) {
-      const id = await getUserVerifiesIdByEmail(ctx, email);
-      if (!id) return await next();
-      await setUserVerifiesKey(id, civ);
-      await sendSecurityCodeEmail(email, civ);
-      ctx.body = {
-        message: `${email} 으로 인증코드를 발송하였습니다.`,
-      };
-    }
-
+    const { body } = ctx.request;
+    const isBoth = isBothAuthProps(ctx, body);
+    if (isBoth) return await next();
+    await sendSecurityCodeByRules(ctx, body);
     return await next();
   } catch (err) {
     const isJoi = handlingJoiError(ctx, err);
     if (isJoi) return next();
+    throw new Error(err);
+  }
+};
+
+/**
+ * @desc 보안코드를 받아서 사용자 인증 정보를 활성화 합니다.
+ */
+export const verifySecurityCodeController = async (
+  ctx: Context,
+  next: Next,
+): Promise<void> => {
+  try {
+    const { body } = ctx.request;
+    const isValid = isVerifySecurityCodeForm(ctx, body);
+    if (!isValid) return await next();
+    const { isCorrectKey, userVerifyId } = await verifySecurityCode(ctx, body);
+    if (!isCorrectKey) return await next();
+    if (typeof userVerifyId === 'number') {
+      await setActivateUserVerifies(userVerifyId);
+    }
+    ctx.body = {
+      message: '인증에 성공하였습니다.',
+    };
+    return await next();
+  } catch (err) {
     throw new Error(err);
   }
 };
