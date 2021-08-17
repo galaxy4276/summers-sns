@@ -1,7 +1,13 @@
 import { Context, Next } from 'koa';
-import { createUserRole } from '@api/user/sql';
-import { handlingJoiError, hashPlainText } from '@services/index';
-import { createUser } from '@api/user/services';
+import { createUserRole, setUserVerifiesKey } from '@api/user/sql';
+import { createDigit, handlingJoiError, hashPlainText } from '@services/index';
+import {
+  createUser,
+  getUserVerifiesIdByEmail,
+  getUserVerifiesIdByPhone,
+  sendSecurityCodeEmail,
+  sendSecurityCodeSms,
+} from '@api/user/services';
 import { validateUser, validateUserRole } from './validate';
 
 /**
@@ -50,6 +56,44 @@ export const createUserRoleController = async (
     ctx.body = {
       createdRoleId,
     };
+    return await next();
+  } catch (err) {
+    const isJoi = handlingJoiError(ctx, err);
+    if (isJoi) return next();
+    throw new Error(err);
+  }
+};
+
+/**
+ * @desc 사용자 인증 정보를 활성화 하기 위한 보안 코드를 전송합니다.
+ */
+export const sendSecurityCodeController = async (
+  ctx: Context,
+  next: Next,
+): Promise<void> => {
+  try {
+    const { email, phone } = ctx.request.body;
+    const civ = createDigit(6);
+    if (phone) {
+      const id = await getUserVerifiesIdByPhone(ctx, phone);
+      if (!id) return await next();
+      await setUserVerifiesKey(id, civ);
+      await sendSecurityCodeSms(phone, civ);
+      ctx.body = {
+        message: `${phone} 으로 인증코드를 발송하였습니다.`,
+      };
+    }
+
+    if (email) {
+      const id = await getUserVerifiesIdByEmail(ctx, email);
+      if (!id) return await next();
+      await setUserVerifiesKey(id, civ);
+      await sendSecurityCodeEmail(email, civ);
+      ctx.body = {
+        message: `${email} 으로 인증코드를 발송하였습니다.`,
+      };
+    }
+
     return await next();
   } catch (err) {
     const isJoi = handlingJoiError(ctx, err);

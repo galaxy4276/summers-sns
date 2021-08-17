@@ -115,16 +115,29 @@ class KoaServer {
       dbPassword: Joi.string().required(),
       dbUser: Joi.string().required(),
       sessionKey: Joi.string().required(),
+      twilioAccountSid: Joi.string().required(),
+      twilioAuthToken: Joi.string().required(),
+      twilioPhone: Joi.string().required(),
+      emailHost: Joi.string().required(),
+      emailPassword: Joi.string().required(),
+      emailUser: Joi.string().required(),
     });
+    const { env } = process;
     const systemValues: Partial<SystemVariables> = {
-      mode: process.env.NODE_ENV,
-      serverPort: process.env.SERVER_PORT as NumberVariables,
-      dbPort: process.env.DB_PORT as NumberVariables,
-      dbHost: process.env.DB_HOST,
-      dbPassword: process.env.DB_PASSWORD,
-      dbName: process.env.DB_NAME,
-      dbUser: process.env.DB_USER,
-      sessionKey: process.env.SESSION_KEY,
+      mode: env.NODE_ENV,
+      serverPort: env.SERVER_PORT as NumberVariables,
+      dbPort: env.DB_PORT as NumberVariables,
+      dbHost: env.DB_HOST,
+      dbPassword: env.DB_PASSWORD,
+      dbName: env.DB_NAME,
+      dbUser: env.DB_USER,
+      sessionKey: env.SESSION_KEY,
+      twilioAccountSid: env.TWILIO_ACCOUNT_SID,
+      twilioAuthToken: env.TWILIO_AUTH_TOKEN,
+      twilioPhone: env.TWILIO_PHONE,
+      emailHost: env.EMAIL_HOST,
+      emailPassword: env.EMAIL_USER,
+      emailUser: env.EMAIL_PASSWORD,
     };
 
     const { value, error } = schema.validate(systemValues);

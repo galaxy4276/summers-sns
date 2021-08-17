@@ -141,6 +141,7 @@ const createAdminTableSql = () =>
      CONSTRAINT pk_user_admins PRIMARY KEY(id)
   );`;
 
+// TODO: email, phone 에 index 적용
 const createUserVerifyTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`user_verifies\`
    (
@@ -148,6 +149,8 @@ const createUserVerifyTableSql = () =>
      email           VARCHAR(255) UNIQUE NULL,
      phone           VARCHAR(40) UNIQUE NULL,
      is_verified     BOOLEAN NOT NULL DEFAULT false,
+     key_expired_at  TIMESTAMP NULL,
+     civ_key             VARCHAR(10) NULL,
      CONSTRAINT pk_user_verified PRIMARY KEY(id)
    );`;
 

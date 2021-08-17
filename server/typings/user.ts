@@ -33,4 +33,11 @@ export interface PhoneUserRole {
   phone: string;
 }
 
-export default {};
+export interface UserRole {
+  id: number;
+  email: string | null;
+  phone: string | null;
+  is_verified: 0 | 1;
+  key_expired_at: Date | null;
+  civ_key: string | null;
+}
