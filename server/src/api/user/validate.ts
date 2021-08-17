@@ -9,13 +9,14 @@ import {
 import Joi from 'joi';
 import { Context } from 'koa';
 import {
-  checkPrevUserProps,
+  checkPrevUserByEmail,
+  checkPrevUserByPhone,
+  checkPrevUserByUsername,
   getBoolCheckPrevUserRole,
   getUserVerifiesCivKeyByEmail,
   getUserVerifiesCivKeyByPhone,
   isVerifiedAccount,
 } from '@api/user/sql';
-import { isSignInEmailForm, isSignInPhoneForm } from '@api/user/types';
 import {
   getUserVerifiesIdByEmail,
   getUserVerifiesIdByPhone,
@@ -102,51 +103,41 @@ export const validateUserCredential = async (
 };
 
 /**
+ * @returns 회원가입 전 유저가 이미 존재하는지 검증하는 함수를 반환
+ */
+export const checkPrevUserByRule = (
+  form: EmailSignInProps | PhoneSignInProps,
+): Promise<string | void> | undefined => {
+  if ('email' in form) {
+    validateSignInFormEmail(form);
+    return checkPrevUserByEmail(form.email);
+  }
+  if ('phone' in form) {
+    validateSignInFormPhone(form);
+    return checkPrevUserByPhone(form.phone);
+  }
+};
+
+/**
  * @desc 사용자 정보가 존재하는 지 bool 값으로 반환합니다.
  */
-
 export const validateUser = async (
   ctx: Context,
   form: EmailSignInProps | PhoneSignInProps,
 ): Promise<boolean> => {
-  const isEmail = isSignInEmailForm(form);
-  const isPhone = isSignInPhoneForm(form);
-  if (isEmail) {
-    const { username, email } = validateSignInFormEmail(
-      form as EmailSignInProps,
-    );
-    const emailError = await checkPrevUserProps(
-      username,
-      'email',
-      email,
-      'users',
-    );
-    if (emailError) {
-      ctx.response.status = 400;
-      ctx.body = {
-        message: emailError,
-      };
-      return true;
-    }
+  const isPrevUsername = await checkPrevUserByUsername(form.username);
+  if (isPrevUsername) {
+    ctx.body = {
+      message: '이미 존재하는 유저이름입니다.',
+    };
+    return true;
   }
-
-  if (isPhone) {
-    const { username, phone } = validateSignInFormPhone(
-      form as PhoneSignInProps,
-    );
-    const phoneError = await checkPrevUserProps(
-      username,
-      'phone',
-      phone,
-      'users',
-    );
-    if (phoneError) {
-      ctx.response.status = 400;
-      ctx.body = {
-        message: phoneError,
-      };
-      return true;
-    }
+  const error = await checkPrevUserByRule(form);
+  if (error) {
+    ctx.body = {
+      message: error,
+    };
+    return true;
   }
 
   return false;
