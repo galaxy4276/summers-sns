@@ -1,23 +1,21 @@
-export interface EmailSignInProps {
-  email: string;
+interface SignInDefaultProps {
   realname: string;
   username: string;
   password: string;
 }
 
-export interface PhoneSignInProps {
+export interface EmailSignInProps extends SignInDefaultProps {
+  email: string;
+}
+
+export interface PhoneSignInProps extends SignInDefaultProps {
   phone: string;
-  realname: string;
-  username: string;
-  password: string;
 }
 
-export interface AllUserProps {
+export interface AllUserProps extends SignInDefaultProps {
   id: number;
-  email: string;
-  realname: string;
-  username: string;
-  password: string;
+  email?: string;
+  phone?: string;
   follower_count: number;
   follwing_count: number;
   created_at: Date;
@@ -25,15 +23,18 @@ export interface AllUserProps {
   deleted_at?: Date;
 }
 
-export interface EmailUserRole {
+interface Email {
   email: string;
 }
 
-export interface PhoneUserRole {
-  phone: string;
+interface Phone {
+  phone: string | number;
 }
 
-export interface UserRole {
+export type EmailUser = Email;
+export type PhoneUser = Phone;
+
+export interface UserVerify {
   id: number;
   email: string | null;
   phone: string | null;
@@ -41,3 +42,14 @@ export interface UserRole {
   key_expired_at: Date | null;
   civ_key: string | null;
 }
+
+export interface EmailVerifyCode extends Email {
+  code: string | number;
+}
+
+export interface PhoneVerifyCode extends Phone {
+  code: string | number;
+}
+
+export type UserVerifyCivKeyReturnType = Pick<UserVerify, 'civ_key'> &
+  Pick<UserVerify, 'id'>;
