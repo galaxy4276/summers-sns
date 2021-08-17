@@ -14,7 +14,6 @@ import {
   verifySecurityCode,
 } from './validate';
 
-// TODO: UserRole 같이 생성해줘야 함
 /**
  * @desc 사용자를 검증하고 회원가입 로직을 수행하는 컨트롤러
  */
