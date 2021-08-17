@@ -1,12 +1,18 @@
 import { Context } from 'koa';
-import { EmailSignInProps, PhoneSignInProps } from '@typings/user';
+import {
+  EmailSignInProps,
+  EmailUser,
+  PhoneSignInProps,
+  PhoneUser,
+} from '@typings/user';
 import {
   createUserByEmail,
   createUserByPhone,
   getUserVerifiesIdByEmailSql,
   getUserVerifiesIdByPhoneSql,
+  setUserVerifiesKey,
 } from '@api/user/sql';
-import { mailClient, twilioSms } from '@services/index';
+import { createDigit, mailClient, twilioSms } from '@services/index';
 import { MessageInstance } from 'twilio/lib/rest/api/v2010/account/message';
 
 /**
@@ -36,7 +42,7 @@ export const createUser = async (
  * @desc code 를 phone 에 SMS 로 문자를 발송합니다.
  */
 export const sendSecurityCodeSms = (
-  phone: string,
+  phone: string | number,
   code: string,
 ): Promise<MessageInstance> =>
   twilioSms.client.messages.create({
@@ -66,7 +72,7 @@ export const sendSecurityCodeEmail = async (
  */
 export const getUserVerifiesIdByPhone = async (
   ctx: Context,
-  phone: string,
+  phone: string | number,
 ): Promise<number | false> => {
   const userRole = await getUserVerifiesIdByPhoneSql(phone);
   if (!userRole) {
@@ -95,4 +101,70 @@ export const getUserVerifiesIdByEmail = async (
     return false;
   }
   return userRole.id;
+};
+
+/**
+ * @desc email, phone 항목이 같이 존재하는 지 유무를 bool 값으로 반환합니다.
+ * @addition 두 값 모두 존재하지 않아도 true 를 반환합니다.
+ */
+export const isBothAuthProps = (
+  ctx: Context,
+  { email, phone }: { email?: string; phone?: string },
+): boolean => {
+  if (!(email || phone)) {
+    ctx.response.status = 400;
+    ctx.body = {
+      message: '요청 props 가 잘못되었습니다.',
+    };
+    return true;
+  }
+  if (email && phone) {
+    ctx.response.status = 400;
+    ctx.body = {
+      message: '요청 props 가 잘못되었습니다.',
+    };
+    return true;
+  }
+  return false;
+};
+
+/**
+ * @desc phone, email 여부를 검사해서 맞는 조건에 따라 인증코드를 발송합니다.
+ */
+export const sendSecurityCodeByRules = async (
+  ctx: Context,
+  body: EmailUser | PhoneUser,
+): Promise<{ isError: boolean }> => {
+  const civ = createDigit(6);
+  const setErrorMessage = () => {
+    ctx.response.status = 500;
+    ctx.body = { message: '서버에서 에러가 발생했습니다.' };
+  };
+
+  if ('email' in body) {
+    const id = await getUserVerifiesIdByEmail(ctx, body.email);
+    if (!id) {
+      setErrorMessage();
+      return { isError: true };
+    }
+    await setUserVerifiesKey(id, civ);
+    await sendSecurityCodeEmail(body.email, civ);
+    ctx.body = {
+      message: `${body.email} 으로 인증코드를 발송하였습니다.`,
+    };
+  }
+
+  if ('phone' in body) {
+    const id = await getUserVerifiesIdByPhone(ctx, body.phone);
+    if (!id) {
+      setErrorMessage();
+      return { isError: true };
+    }
+    await setUserVerifiesKey(id, civ);
+    await sendSecurityCodeSms(body.phone, civ);
+    ctx.body = {
+      message: `${body.phone} 으로 인증코드를 발송하였습니다.`,
+    };
+  }
+  return { isError: false };
 };

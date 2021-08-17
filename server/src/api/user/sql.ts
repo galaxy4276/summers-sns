@@ -1,13 +1,17 @@
 import {
   AllUserProps,
   EmailSignInProps,
-  EmailUserRole,
+  EmailUser,
   PhoneSignInProps,
-  PhoneUserRole,
-  UserRole,
+  PhoneUser,
+  UserVerify,
+  UserVerifyCivKeyReturnType,
 } from '@typings/user';
 import { mariadb } from '@config/index';
-import { getBoolAnyQueryPromise } from '../../services';
+import {
+  getBoolAnyQueryByTargetPromise,
+  getBoolAnyQueryPromise,
+} from '../../services';
 
 export const createUserByEmail = async (
   form: EmailSignInProps,
@@ -63,7 +67,7 @@ export const createUserByPhone = async (
  * @desc 사용자 인증 정보를 생성합니다.
  * @return 생성된 사용자 번호를 반환합니다.
  */
-export const createUserRole = async (
+export const createUserCredentials = async (
   email?: string,
   phone?: string,
 ): Promise<number | void> => {
@@ -136,7 +140,7 @@ export const checkPrevUserProps = async (
  * @return 오류메시지 에 대해 string 으로 반환합니다. ( 없으면 void )
  */
 export const getBoolCheckPrevUserRole = async (
-  form: EmailUserRole | PhoneUserRole,
+  form: EmailUser | PhoneUser,
 ): Promise<string | void> => {
   const conn = await mariadb.pool.getConnection();
   if ('email' in form) {
@@ -166,33 +170,33 @@ export const getBoolCheckPrevUserRole = async (
 
 /**
  * @desc 해당 번호를 가진 user_verifies 항목의 아이디를 가져오는 Sql 을 실행합니다.
- * @return userRole 타입의 객체를 반환합니다.
+ * @return UserVerify 타입의 객체를 반환합니다.
  */
 export const getUserVerifiesIdByPhoneSql = async (
-  phone: string,
-): Promise<UserRole> => {
+  phone: string | number,
+): Promise<UserVerify> => {
   const conn = await mariadb.pool.getConnection();
   const queryResult = await conn.query(
     `SELECT * FROM \`summers-sns\`.user_verifies WHERE phone = ?`,
     [phone],
   );
-  return queryResult[0] as UserRole;
+  return queryResult[0] as UserVerify;
 };
 
 /**
  * @desc 해당 이메일을 가진 user_verifies 항목의 아이디를 가져오는 Sql 을 실행합니다.
- * @return userRole 타입의 객체를 반환합니다.
+ * @return UserVerify 타입의 객체를 반환합니다.
  */
 export const getUserVerifiesIdByEmailSql = async (
   email: string,
-): Promise<UserRole> => {
+): Promise<UserVerify> => {
   const conn = await mariadb.pool.getConnection();
   const queryResult = await conn.query(
     'SELECT * FROM `summers-sns`.user_verifies WHERE email = ?',
     [email],
   );
   await conn.end();
-  return queryResult[0] as UserRole;
+  return queryResult[0] as UserVerify;
 };
 
 /**
@@ -206,6 +210,72 @@ export const setUserVerifiesKey = async (
   await conn.query(
     `UPDATE \`summers-sns\`.user_verifies SET civ_key = ? WHERE id = ?`,
     [civ, id],
+  );
+  await conn.end();
+};
+
+/**
+ * @desc 사용자 인증 정보가 활성화(true) 상태인 지 bool 값으로 반환합니다.
+ */
+export const isVerifiedAccount = async (id: number): Promise<boolean> => {
+  const conn = await mariadb.pool.getConnection();
+  const isVerified = await getBoolAnyQueryByTargetPromise(
+    conn.query(
+      `
+      SELECT is_verified FROM \`summers-sns\`.user_verifies WHERE id = ?
+    `,
+      [id],
+    ),
+    'is_verified',
+    1,
+    false,
+  );
+  await conn.end();
+  return isVerified;
+};
+
+/**
+ * @desc 사용자 인증 정보에서 civ_key 항목을 빼내옵니다.
+ */
+export const getUserVerifiesCivKeyByEmail = async (
+  email: string,
+): Promise<UserVerifyCivKeyReturnType> => {
+  const conn = await mariadb.pool.getConnection();
+  const userVerify = await conn.query(
+    `
+    SELECT civ_key, id FROM \`summers-sns\`.user_verifies WHERE email = ?
+  `,
+    [email],
+  );
+  await conn.end();
+  return userVerify[0] as UserVerifyCivKeyReturnType;
+};
+
+/**
+ * @desc 사용자 인증 정보에서 civ_key 항목을 빼내옵니다.
+ */
+export const getUserVerifiesCivKeyByPhone = async (
+  phone: string | number,
+): Promise<UserVerifyCivKeyReturnType> => {
+  const conn = await mariadb.pool.getConnection();
+  const userVerify = await conn.query(
+    `
+    SELECT civ_key, id FROM \`summers-sns\`.user_verifies WHERE phone = ?
+  `,
+    [phone],
+  );
+  await conn.end();
+  return userVerify[0] as UserVerifyCivKeyReturnType;
+};
+
+/**
+ * @desc 사용자 인증 정보에서 인증정보를 활성화 합니다.
+ */
+export const setActivateUserVerifies = async (id: number) => {
+  const conn = await mariadb.pool.getConnection();
+  await conn.query(
+    `UPDATE \`summers-sns\`.user_verifies SET is_verified = ? WHERE id = ?`,
+    [true, id],
   );
   await conn.end();
 };

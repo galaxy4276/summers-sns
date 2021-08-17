@@ -1,13 +1,25 @@
 import {
   EmailSignInProps,
-  EmailUserRole,
+  EmailUser,
+  EmailVerifyCode,
   PhoneSignInProps,
-  PhoneUserRole,
+  PhoneUser,
+  PhoneVerifyCode,
 } from '@typings/user';
 import Joi from 'joi';
 import { Context } from 'koa';
-import { checkPrevUserProps, getBoolCheckPrevUserRole } from '@api/user/sql';
+import {
+  checkPrevUserProps,
+  getBoolCheckPrevUserRole,
+  getUserVerifiesCivKeyByEmail,
+  getUserVerifiesCivKeyByPhone,
+  isVerifiedAccount,
+} from '@api/user/sql';
 import { isSignInEmailForm, isSignInPhoneForm } from '@api/user/types';
+import {
+  getUserVerifiesIdByEmail,
+  getUserVerifiesIdByPhone,
+} from '@api/user/services';
 
 /**
  * @desc 이메일 회원가입 폼 검증 함수
@@ -52,8 +64,8 @@ export const validateSignInFormPhone = (
 /**
  * @desc 이메일로 가입하는 사용자 인증 정보 생성 폼 검증 함수
  */
-const validateUserRoleFormEmail = (form: EmailUserRole) => {
-  const { error } = Joi.object<EmailUserRole>({
+const validateUserRoleFormEmail = (form: EmailUser) => {
+  const { error } = Joi.object<EmailUser>({
     email: Joi.string().email().required(),
   }).validate(form);
   if (error) throw new Error(`${error.message}(joi)`);
@@ -62,8 +74,8 @@ const validateUserRoleFormEmail = (form: EmailUserRole) => {
 /**
  * @desc 번호로 가입하는 사용자 인증 정보 생성 폼 검증 함수
  */
-const validateUserRoleFormPhone = (form: PhoneUserRole) => {
-  const { error } = Joi.object<PhoneUserRole>({
+const validateUserRoleFormPhone = (form: PhoneUser) => {
+  const { error } = Joi.object<PhoneUser>({
     phone: Joi.string().max(40).required(),
   }).validate(form);
   if (error) throw new Error(`${error.message}(joi)`);
@@ -72,9 +84,9 @@ const validateUserRoleFormPhone = (form: PhoneUserRole) => {
 /**
  * @desc 사용자 인증 정보가 존재하는지 bool 값으로 반환합니다.
  */
-export const validateUserRole = async (
+export const validateUserCredential = async (
   ctx: Context,
-  form: EmailUserRole | PhoneUserRole,
+  form: EmailUser | PhoneUser,
 ): Promise<boolean> => {
   if ('email' in form) validateUserRoleFormEmail(form);
   if ('phone' in form) validateUserRoleFormPhone(form);
@@ -143,4 +155,113 @@ export const validateUser = async (
 /**
  * @desc 계정에 대한 인증을 수행한 사용자인 지 검사합니다.
  */
-export const checkVerifiedUser = () => {};
+export const isVerifiedUser = async (
+  ctx: Context,
+  form: EmailSignInProps | PhoneSignInProps,
+): Promise<boolean> => {
+  const setError = () => {
+    ctx.response.status = 400;
+    ctx.body = { message: '이메일 또는 SMS 에서 인증되지 않은 유저입니다.' };
+  };
+  const isCheck = async (id: number) => {
+    const isVerified = await isVerifiedAccount(id);
+    if (!isVerified) setError();
+    return isVerified;
+  };
+
+  if ('email' in form) {
+    const id = await getUserVerifiesIdByEmail(ctx, form.email);
+    if (!id) {
+      setError();
+      return false;
+    }
+    return isCheck(id);
+  }
+
+  if ('phone' in form) {
+    const id = await getUserVerifiesIdByPhone(ctx, form.phone);
+    if (!id) {
+      setError();
+      return false;
+    }
+    return isCheck(id);
+  }
+  return false;
+};
+
+/**
+ * @desc 인증 코드 활성화를 위한 요청을 검증합니다.
+ */
+export const isVerifySecurityCodeForm = (
+  ctx: Context,
+  form: EmailVerifyCode | PhoneVerifyCode,
+): boolean => {
+  const setError = () => {
+    ctx.response.status = 400;
+    ctx.body = {
+      message: '잘못된 요청입니다.',
+    };
+  };
+  if ('email' in form) {
+    return form.code !== undefined;
+  }
+  if ('phone' in form) {
+    return form.code !== undefined;
+  }
+  setError();
+  return false;
+};
+
+/**
+ * @desc 존재하는 사용자 인증 정보에서 body 에서 받은 인증코드 값을 비교하여 bool 로 반환합니다.
+ */
+
+type VerifySecurityCodeReturnType = {
+  isCorrectKey: boolean;
+  userVerifyId?: number;
+};
+export const verifySecurityCode = async (
+  ctx: Context,
+  form: EmailVerifyCode | PhoneVerifyCode,
+): Promise<VerifySecurityCodeReturnType> => {
+  const setKeyError = () => {
+    ctx.response.status = 400;
+    ctx.body = {
+      message: '인증 정보 또는 인증코드가 존재하지 않습니다.',
+    };
+  };
+  const setCorrectError = () => {
+    ctx.response.status = 400;
+    ctx.body = {
+      message: '입력된 인증코드가 잘못되었습니다.',
+    };
+  };
+  if ('email' in form) {
+    const { civ_key: key, id } = await getUserVerifiesCivKeyByEmail(form.email);
+    if (!key) {
+      setKeyError();
+      return { isCorrectKey: false };
+    }
+    const isCorrectKey = String(form.code) === key;
+    if (!isCorrectKey) setCorrectError();
+    return {
+      isCorrectKey,
+      userVerifyId: id,
+    };
+  }
+
+  if ('phone' in form) {
+    const { civ_key: key, id } = await getUserVerifiesCivKeyByPhone(form.phone);
+    if (!key) {
+      setKeyError();
+      return { isCorrectKey: false };
+    }
+    const isCorrectKey = String(form.code) === key;
+    if (!isCorrectKey) setCorrectError();
+    return {
+      isCorrectKey,
+      userVerifyId: id,
+    };
+  }
+  return { isCorrectKey: false };
+};
