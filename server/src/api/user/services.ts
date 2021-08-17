@@ -8,6 +8,7 @@ import {
 import {
   createUserByEmail,
   createUserByPhone,
+  createUserRole,
   getUserVerifiesIdByEmailSql,
   getUserVerifiesIdByPhoneSql,
   setUserVerifiesKey,
@@ -24,6 +25,7 @@ export const createUser = async (
 ): Promise<void> => {
   if ('email' in form) {
     const user = await createUserByEmail(form);
+    await createUserRole(user.id);
     ctx.body = {
       message: `${user.username} 유저가 생성되었습니다.`,
     };
@@ -31,6 +33,7 @@ export const createUser = async (
   }
   if ('phone' in form) {
     const user = await createUserByPhone(form);
+    await createUserRole(user.id);
     ctx.body = {
       message: `${user.username} 유저가 생성되었습니다.`,
     };

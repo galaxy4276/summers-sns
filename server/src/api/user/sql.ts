@@ -13,6 +13,10 @@ import {
   getBoolAnyQueryPromise,
 } from '../../services';
 
+/**
+ * @desc 이메일 정보로 사용자를 생성합니다.
+ * @return 사용자 정보 객체
+ */
 export const createUserByEmail = async (
   form: EmailSignInProps,
 ): Promise<AllUserProps> => {
@@ -28,16 +32,22 @@ export const createUserByEmail = async (
     `,
       [email, null, realname, username, password, 0, 0, new Date(), new Date()],
     );
-    return (
+    const user = (
       await conn.query(`SELECT * FROM \`summers-sns\`.users WHERE id = ?;`, [
         insertId,
       ])
     )[0] as AllUserProps;
+    await conn.end();
+    return user;
   } catch (err) {
     throw new Error(err);
   }
 };
 
+/**
+ * @desc 번호로 사용자를 생성합니다.
+ * @return 사용자 정보 객체
+ */
 export const createUserByPhone = async (
   form: PhoneSignInProps,
 ): Promise<AllUserProps> => {
@@ -53,14 +63,31 @@ export const createUserByPhone = async (
     `,
       [null, phone, realname, username, password, 0, 0, new Date(), new Date()],
     );
-    return (
+    const user = (
       await conn.query(`SELECT * FROM \`summers-sns\`.users WHERE id = ?;`, [
         insertId,
       ])
     )[0] as AllUserProps;
+    await conn.end();
+    return user;
   } catch (err) {
     throw new Error(err);
   }
+};
+
+/**
+ * @desc 사용자 상세 정보를 생성합니다. ( 어드민 관리 )
+ * @return void
+ */
+export const createUserRole = async (userId: number): Promise<void> => {
+  const conn = await mariadb.pool.getConnection();
+  await conn.query(
+    `
+  INSERT INTO \`summers-sns\`.user_roles (user_id) VALUES (?);
+  `,
+    [userId],
+  );
+  await conn.end();
 };
 
 /**
@@ -97,14 +124,10 @@ export const createUserCredentials = async (
 };
 
 /**
- * @desc 사용자와 사용자 정보 테이블에서 target 에 해당하는 데이터가 이미 존재하는 지 검사합니다.
- * @return 에러 유무를 string 으로 전달합니다. ( 없으면 void )
+ * @desc 사용자 이름이 이미 가입되어 있는 지 판단합니다.
  */
-export const checkPrevUserProps = async (
+export const checkPrevUserByUsername = async (
   username: string,
-  checkProp: string,
-  target: string,
-  tableName: 'users' | 'user_verifies',
 ): Promise<string | void> => {
   const conn = await mariadb.pool.getConnection();
   const isUsername = await getBoolAnyQueryPromise(
@@ -118,21 +141,47 @@ export const checkPrevUserProps = async (
     false,
   );
   if (isUsername) return '이미 존재하는 사용자 이름입니다.';
-  const isCheckProp = await getBoolAnyQueryPromise(
-    conn.query(
-      `
-    SELECT ? FROM \`summers-sns\`.? WHERE ? = ?
-  `,
-      [checkProp, tableName, checkProp, target],
-    ),
-    'username',
+};
+
+/**
+ * @desc 사용자 이메일이 이미 가입되어 있는 지 판단합니다.
+ */
+export const checkPrevUserByEmail = async (
+  email: string,
+): Promise<string | void> => {
+  const conn = await mariadb.pool.getConnection();
+  const isEmail = await getBoolAnyQueryPromise(
+    conn.query(`SELECT email FROM \`summers-sns\`.users WHERE email = ?`, [
+      email,
+    ]),
+    'email',
     false,
   );
 
-  if (isCheckProp) {
-    if (checkProp === 'email') return '이미 가입된 이메일입니다.';
-    if (checkProp === 'phone') return '이미 가입된 번호입니다.';
-  }
+  await conn.end();
+  if (isEmail) return '이미 가입된 이메일입니다.';
+};
+
+/**
+ * @desc 사용자 번호가 이미 가입되어 있는 지 판단합니다.
+ */
+export const checkPrevUserByPhone = async (
+  phone: string | number,
+): Promise<string | void> => {
+  const conn = await mariadb.pool.getConnection();
+  const isPhone = await getBoolAnyQueryPromise(
+    conn.query(
+      `
+            SELECT phone FROM \`summers-sns\`.users WHERE phone = ?
+      `,
+      [phone],
+    ),
+    'phone',
+    false,
+  );
+
+  await conn.end();
+  if (isPhone) return '이미 가입된 번호입니다.';
 };
 
 /**

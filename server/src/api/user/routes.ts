@@ -8,7 +8,6 @@ import {
 
 const userRouter = new Router({ prefix: '/user' });
 
-// userRouter.post('/role', createUserRoleController);
 userRouter.post('/credentials', createCredentialsController);
 userRouter.post('/sms', sendSecurityCodeController);
 userRouter.post('/sms/verify', verifySecurityCodeController);
