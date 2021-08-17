@@ -26,18 +26,18 @@ export const createUser = async (
   if ('email' in form) {
     const user = await createUserByEmail(form);
     await createUserRole(user.id);
+    ctx.response.status = 201;
     ctx.body = {
       message: `${user.username} 유저가 생성되었습니다.`,
     };
-    ctx.response.status = 201;
   }
   if ('phone' in form) {
     const user = await createUserByPhone(form);
     await createUserRole(user.id);
+    ctx.response.status = 201;
     ctx.body = {
       message: `${user.username} 유저가 생성되었습니다.`,
     };
-    ctx.response.status = 201;
   }
 };
 
