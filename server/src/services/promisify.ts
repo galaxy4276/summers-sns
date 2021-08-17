@@ -26,4 +26,15 @@ export const getBoolAnyQueryPromise = (
       return false;
     });
 
-export default {};
+export const getBoolAnyQueryByTargetPromise = (
+  promise: Promise<any>,
+  checkProp: string,
+  target: string | number,
+  isError: boolean,
+): Promise<boolean> =>
+  promise
+    .then((data) => data[0][checkProp] === target)
+    .catch((err) => {
+      if (isError) log(err);
+      return false;
+    });
