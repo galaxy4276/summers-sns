@@ -68,6 +68,7 @@ export const validateSignInFormPhone = (
 const validateUserRoleFormEmail = (form: EmailUser) => {
   const { error } = Joi.object<EmailUser>({
     email: Joi.string().email().required(),
+    isTest: Joi.bool(),
   }).validate(form);
   if (error) throw new Error(`${error.message}(joi)`);
 };
@@ -78,6 +79,7 @@ const validateUserRoleFormEmail = (form: EmailUser) => {
 const validateUserRoleFormPhone = (form: PhoneUser) => {
   const { error } = Joi.object<PhoneUser>({
     phone: Joi.string().max(40).required(),
+    isTest: Joi.bool(),
   }).validate(form);
   if (error) throw new Error(`${error.message}(joi)`);
 };
@@ -89,16 +91,22 @@ export const validateUserCredential = async (
   ctx: Context,
   form: EmailUser | PhoneUser,
 ): Promise<boolean> => {
+  if (!((<EmailUser>form).email || (<PhoneUser>form).phone)) {
+    ctx.response.status = 400;
+    return true;
+  }
+
   if ('email' in form) validateUserRoleFormEmail(form);
   if ('phone' in form) validateUserRoleFormPhone(form);
-
   const previousError = await getBoolCheckPrevUserRole(form);
   if (previousError) {
+    ctx.response.status = 400;
     ctx.body = {
       message: previousError,
     };
     return true;
   }
+  ctx.response.status = 400;
   return false;
 };
 
@@ -109,11 +117,9 @@ export const checkPrevUserByRule = (
   form: EmailSignInProps | PhoneSignInProps,
 ): Promise<string | void> | undefined => {
   if ('email' in form) {
-    validateSignInFormEmail(form);
     return checkPrevUserByEmail(form.email);
   }
   if ('phone' in form) {
-    validateSignInFormPhone(form);
     return checkPrevUserByPhone(form.phone);
   }
 };
@@ -121,12 +127,20 @@ export const checkPrevUserByRule = (
 /**
  * @desc 사용자 정보가 존재하는 지 bool 값으로 반환합니다.
  */
-export const validateUser = async (
+export const isValidUser = async (
   ctx: Context,
   form: EmailSignInProps | PhoneSignInProps,
 ): Promise<boolean> => {
+  if (!((<EmailSignInProps>form).email || (<PhoneSignInProps>form).phone)) {
+    ctx.response.status = 400;
+    return true;
+  }
+  if ('email' in form) validateSignInFormEmail(form);
+  if ('phone' in form) validateSignInFormPhone(form);
+
   const isPrevUsername = await checkPrevUserByUsername(form.username);
   if (isPrevUsername) {
+    ctx.response.status = 400;
     ctx.body = {
       message: '이미 존재하는 유저이름입니다.',
     };
@@ -134,6 +148,7 @@ export const validateUser = async (
   }
   const error = await checkPrevUserByRule(form);
   if (error) {
+    ctx.response.status = 400;
     ctx.body = {
       message: error,
     };

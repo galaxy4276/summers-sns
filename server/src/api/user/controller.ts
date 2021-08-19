@@ -9,7 +9,7 @@ import {
 import {
   isVerifiedUser,
   isVerifySecurityCodeForm,
-  validateUser,
+  isValidUser,
   validateUserCredential,
   verifySecurityCode,
 } from './validate';
@@ -23,7 +23,7 @@ export const signInController = async (
 ): Promise<void> => {
   try {
     const signInForm = ctx.request.body;
-    const isError = await validateUser(ctx, signInForm);
+    const isError = await isValidUser(ctx, signInForm);
     if (isError) return await next();
     const isVerified = await isVerifiedUser(ctx, signInForm);
     if (!isVerified) return await next();
@@ -56,8 +56,13 @@ export const createCredentialsController = async (
       credentialsForm.email,
       credentialsForm.phone,
     )) as number;
+    if (credentialsForm.isTest) {
+      ctx.response.status = 200;
+      return await next();
+    }
     const { isError } = await sendSecurityCodeByRules(ctx, credentialsForm);
     if (isError) return await next();
+    ctx.response.status = 201;
     ctx.body = {
       createdRoleId,
     };

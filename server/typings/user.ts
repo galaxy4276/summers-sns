@@ -31,8 +31,12 @@ interface Phone {
   phone: string | number;
 }
 
-export type EmailUser = Email;
-export type PhoneUser = Phone;
+interface TestProp {
+  isTest?: boolean;
+}
+
+export type EmailUser = Email & TestProp;
+export type PhoneUser = Phone & TestProp;
 
 export interface UserVerify {
   id: number;

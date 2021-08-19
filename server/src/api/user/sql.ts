@@ -116,6 +116,7 @@ export const createUserCredentials = async (
     `,
         [phone],
       );
+      await conn.end();
       return insertId;
     }
   } catch (err) {
@@ -140,6 +141,7 @@ export const checkPrevUserByUsername = async (
     'username',
     false,
   );
+  await conn.end();
   if (isUsername) return '이미 존재하는 사용자 이름입니다.';
 };
 
@@ -201,7 +203,10 @@ export const getBoolCheckPrevUserRole = async (
       'email',
       false,
     );
-    if (isPrevEmail) return '이미 가입된 이메일입니다.';
+    if (isPrevEmail) {
+      await conn.end();
+      return '이미 가입된 이메일입니다.';
+    }
   }
 
   if ('phone' in form) {
@@ -213,7 +218,10 @@ export const getBoolCheckPrevUserRole = async (
       'phone',
       false,
     );
-    if (isPrevPhone) return '이미 가입된 번호입니다.';
+    if (isPrevPhone) {
+      await conn.end();
+      return '이미 가입된 번호입니다.';
+    }
   }
 };
 
@@ -229,6 +237,7 @@ export const getUserVerifiesIdByPhoneSql = async (
     `SELECT * FROM \`summers-sns\`.user_verifies WHERE phone = ?`,
     [phone],
   );
+  await conn.end();
   return queryResult[0] as UserVerify;
 };
 
@@ -320,7 +329,7 @@ export const getUserVerifiesCivKeyByPhone = async (
 /**
  * @desc 사용자 인증 정보에서 인증정보를 활성화 합니다.
  */
-export const setActivateUserVerifies = async (id: number) => {
+export const setActivateUserVerifies = async (id: number): Promise<void> => {
   const conn = await mariadb.pool.getConnection();
   await conn.query(
     `UPDATE \`summers-sns\`.user_verifies SET is_verified = ? WHERE id = ?`,
