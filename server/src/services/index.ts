@@ -9,4 +9,12 @@ export { default as handlingJoiError } from './handling-joi';
 export { default as twilioSms } from './twilio-client';
 export { default as createDigit } from './create-digit';
 export { default as mailClient } from './mailer';
-export { getUserById, getUserByEmail, getUserByPhone } from './common-sql';
+export {
+  getUserById,
+  getUserByEmail,
+  getUserByPhone,
+  getSafeUserByEmail,
+  getSafeUserByPhone,
+  getSafeUserById,
+} from './common-sql';
+export { swaggerDocument } from './swagger';

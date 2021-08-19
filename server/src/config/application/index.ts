@@ -12,6 +12,7 @@ import { Document, loadDocumentSync } from 'swagger2';
 import { ui } from 'swagger2-koa';
 import rootRouter from '@api/index';
 import session from 'koa-session';
+import { LocalPassport } from '@services/index';
 
 type NumberVariables = number | undefined;
 
@@ -35,14 +36,19 @@ class KoaServer {
   }
 
   setAuthMiddlewares(): this {
+    this.app.keys = [this.systemVariables.sessionKey];
     this.app.use(
       session(
         {
           key: this.systemVariables.sessionKey,
+          maxAge: 86400000,
+          httpOnly: true,
+          signed: true,
         },
         this.app,
       ),
     );
+    this.app.use(LocalPassport.session());
     return this;
   }
 

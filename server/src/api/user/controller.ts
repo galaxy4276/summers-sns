@@ -50,8 +50,17 @@ export const createCredentialsController = async (
 ): Promise<void> => {
   try {
     const credentialsForm = ctx.request.body;
-    const isPrevious = await validateUserCredential(ctx, credentialsForm);
-    if (isPrevious) return await next();
+    const { isPrevious, isFormError } = await validateUserCredential(
+      ctx,
+      credentialsForm,
+    );
+    if (isFormError) return await next();
+    if (isPrevious) {
+      // 인증 정보가 이미 존재하면, SMS 코드만 새로 갱신해서 발송
+      const { isError } = await sendSecurityCodeByRules(ctx, credentialsForm);
+      if (isError) return await next();
+      return await next();
+    }
     const createdRoleId = (await createUserCredentials(
       credentialsForm.email,
       credentialsForm.phone,
@@ -117,4 +126,20 @@ export const verifySecurityCodeController = async (
   } catch (err) {
     throw new Error(err);
   }
+};
+
+/**
+ * @desc 사용자 로그인을 수행합니다.
+ */
+export const loginController = async (
+  ctx: Context,
+  next: Next,
+): Promise<void> => {
+  if (ctx.response.status < 400) {
+    ctx.body = {
+      message: '로그인 성공',
+    };
+  }
+
+  await next();
 };
