@@ -1,4 +1,4 @@
-export { default as hashPlainText } from './hash-plain';
+export { hashPlain as hashPlainText, compareHash } from './bcrypt';
 export {
   getBoolAnyPromise,
   getBoolAnyQueryPromise,
@@ -9,3 +9,4 @@ export { default as handlingJoiError } from './handling-joi';
 export { default as twilioSms } from './twilio-client';
 export { default as createDigit } from './create-digit';
 export { default as mailClient } from './mailer';
+export { getUserById, getUserByEmail, getUserByPhone } from './common-sql';
