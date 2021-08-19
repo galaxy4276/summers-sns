@@ -43,7 +43,7 @@ class LocalPassPort {
   async getSessionDatabase(sessionId: string): Promise<any> {
     const conn = await mariadb.pool.getConnection();
     const queryResult = await conn.query(
-      `SELECT session_id FROM \`summers-sns\`.session_store WHERE session_id = ?;`,
+      `SELECT user_id FROM \`summers-sns\`.session_store WHERE session_id = ?;`,
       [sessionId],
     );
     return queryResult[0];
@@ -104,28 +104,23 @@ class LocalPassPort {
 
   async getDbSessionIfNotExists(ctx: Context, clientId: string): Promise<any> {
     const session = <Session>ctx.session;
-    console.log({ session });
     const serverSession = session[clientId] as string | undefined;
     if (serverSession) {
-      console.log('서버 로컬 세션 반환');
       return serverSession;
     }
-    const sessionData = (await this.getSessionDatabase(clientId)) as any;
-    console.log({ sessionData });
-    return sessionData;
+    const { user_id: id } = (await this.getSessionDatabase(clientId)) as {
+      user_id: number;
+    };
+    return id;
   }
 
   session() {
     return async (ctx: Context, next: Next) => {
-      console.log('session 미들웨어 시작');
       if (ctx.path === '/api/user/login') {
         return next();
       }
       const clientSessionId = ctx.cookies.get('sid');
       if (!clientSessionId) return next();
-      console.log({ clientSessionId });
-      const test = await this.getDbSessionIfNotExists(ctx, clientSessionId);
-      console.log({ test });
       // FIXME: 데이터베이스에서 꺼내올 경우도 추가해야한다.
       const userId = await this.getDbSessionIfNotExists(ctx, clientSessionId);
       if (userId) ctx.user = await getUserById(userId);
