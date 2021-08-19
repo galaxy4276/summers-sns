@@ -85,15 +85,24 @@ const validateUserRoleFormPhone = (form: PhoneUser) => {
 };
 
 /**
- * @desc 사용자 인증 정보가 존재하는지 bool 값으로 반환합니다.
+ * @desc 입력 폼을 검사하고, 사용자 인증 정보가 존재하는지 검사합니다.
+ * @return @type ValidateCredentialReturns
  */
+
+type ValidateCredentialReturns = {
+  isFormError: boolean;
+  isPrevious: boolean;
+};
 export const validateUserCredential = async (
   ctx: Context,
   form: EmailUser | PhoneUser,
-): Promise<boolean> => {
+): Promise<ValidateCredentialReturns> => {
   if (!((<EmailUser>form).email || (<PhoneUser>form).phone)) {
     ctx.response.status = 400;
-    return true;
+    ctx.body = {
+      message: '인증정보가 존재하지 않습니다.',
+    };
+    return { isFormError: true, isPrevious: false };
   }
 
   if ('email' in form) validateUserRoleFormEmail(form);
@@ -104,10 +113,10 @@ export const validateUserCredential = async (
     ctx.body = {
       message: previousError,
     };
-    return true;
+    return { isFormError: false, isPrevious: true };
   }
   ctx.response.status = 400;
-  return false;
+  return { isFormError: false, isPrevious: false };
 };
 
 /**
