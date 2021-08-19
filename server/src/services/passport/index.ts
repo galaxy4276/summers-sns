@@ -5,7 +5,7 @@ import { Session } from 'koa-session';
 import { v4 as uuid } from 'uuid';
 import { compareHash } from '@services/bcrypt';
 import { Connection } from 'mariadb';
-import { getUserById } from '@services/common-sql';
+import { getSafeUserById } from '@services/common-sql';
 
 class LocalPassPort {
   setNoUserError(ctx: Context): void {
@@ -123,7 +123,7 @@ class LocalPassPort {
       if (!clientSessionId) return next();
       // FIXME: 데이터베이스에서 꺼내올 경우도 추가해야한다.
       const userId = await this.getDbSessionIfNotExists(ctx, clientSessionId);
-      if (userId) ctx.user = await getUserById(userId);
+      if (userId) ctx.user = await getSafeUserById(userId);
       await next();
     };
   }
