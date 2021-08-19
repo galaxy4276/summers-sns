@@ -107,6 +107,7 @@ export const createUserCredentials = async (
     `,
         [email],
       );
+      await conn.end();
       return insertId;
     }
     if (phone) {
