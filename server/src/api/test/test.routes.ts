@@ -14,5 +14,11 @@ testRouter.get('/session/views', (ctx) => {
     n,
   };
 });
+testRouter.get('/session/init', (ctx) => {
+  ctx.session = null;
+  ctx.body = {
+    message: '세션을 초기화하였습니다.',
+  };
+});
 
 export default testRouter;
