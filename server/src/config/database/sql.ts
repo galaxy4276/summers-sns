@@ -154,6 +154,15 @@ const createUserVerifyTableSql = () =>
      CONSTRAINT pk_user_verified PRIMARY KEY(id)
    );`;
 
+const createSessionStoreTableSql = () =>
+  `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`session_store\`
+   (
+     id              INT(11) AUTO_INCREMENT NOT NULL,
+     session_id      VARCHAR(255) NOT NULL,
+     user_id         INT(11) NOT NULL,
+     CONSTRAINT pk_session_store PRIMARY KEY(id)
+   )`;
+
 const createDatabaseIfNotExists = async (conn: Pool): Promise<void> => {
   await conn.query(createDatabaseSqlIfNotExists());
   await conn.query(createUserTableSql());
@@ -167,6 +176,7 @@ const createDatabaseIfNotExists = async (conn: Pool): Promise<void> => {
   await conn.query(createUserRoleTableSql());
   await conn.query(createAdminTableSql());
   await conn.query(createUserVerifyTableSql());
+  await conn.query(createSessionStoreTableSql());
 };
 
 export default createDatabaseIfNotExists;
