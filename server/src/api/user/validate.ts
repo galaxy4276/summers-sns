@@ -105,6 +105,9 @@ export const validateUserCredential = async (
     return { isFormError: true, isPrevious: false };
   }
 
+  if (form.isTest) {
+    if (typeof form.isTest !== 'boolean') form.isTest = form.isTest === 'true';
+  }
   if ('email' in form) validateUserRoleFormEmail(form);
   if ('phone' in form) validateUserRoleFormPhone(form);
   const previousError = await getBoolCheckPrevUserRole(form);
