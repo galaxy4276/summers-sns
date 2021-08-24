@@ -65,3 +65,11 @@ export interface DbSession {
   session_id: string;
   user_id: number;
 }
+
+export interface PhoneLogin extends Phone {
+  password: string;
+}
+
+export interface EmailLogin extends Email {
+  password: string;
+}
