@@ -3,7 +3,7 @@ import { Context } from 'koa';
 /**
  * @desc 에러 관련 설정을 포함한 인증 관련 추상 클래스입니다.
  */
-export default class AuthErrorAbstract {
+export default abstract class AuthErrorAbstract {
   setNoUserError(ctx: Context): void {
     ctx.body = {
       message: '사용자가 존재하지 않습니다.',
