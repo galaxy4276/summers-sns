@@ -18,3 +18,4 @@ export {
   getSafeUserById,
 } from './common-sql';
 export { swaggerDocument } from './swagger';
+export { isTestProps } from './test-utils';

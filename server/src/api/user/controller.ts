@@ -1,6 +1,6 @@
 import { Context, Next } from 'koa';
 import { createUserCredentials, setActivateUserVerifies } from '@api/user/sql';
-import { handlingJoiError, hashPlainText } from '@services/index';
+import { handlingJoiError, hashPlainText, isTestProps } from '@services/index';
 import {
   createUser,
   isBothAuthProps,
@@ -55,8 +55,11 @@ export const createCredentialsController = async (
       credentialsForm,
     );
     if (isFormError) return await next();
+    const isTest = isTestProps(ctx, '이미 존재하는 인증정보입니다.', 400);
+
     if (isPrevious) {
       // 인증 정보가 이미 존재하면, SMS 코드만 새로 갱신해서 발송
+      if (isTest) return await next();
       const { isError } = await sendSecurityCodeByRules(ctx, credentialsForm);
       if (isError) return await next();
       return await next();
@@ -65,8 +68,8 @@ export const createCredentialsController = async (
       credentialsForm.email,
       credentialsForm.phone,
     )) as number;
-    if (credentialsForm.isTest) {
-      ctx.response.status = 200;
+    if (isTest) {
+      isTestProps(ctx, '생성완료', 201);
       return await next();
     }
     const { isError } = await sendSecurityCodeByRules(ctx, credentialsForm);

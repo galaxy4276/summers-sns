@@ -1,4 +1,6 @@
 import { Pool } from 'mariadb';
+import { hashPlainText } from '@services/index';
+import { TestSignIn } from '@test/enum';
 
 const createDatabaseSqlIfNotExists = () =>
   `
@@ -149,7 +151,6 @@ const createUserVerifyTableSql = () =>
      email           VARCHAR(255) UNIQUE NULL,
      phone           VARCHAR(40) UNIQUE NULL,
      is_verified     BOOLEAN NOT NULL DEFAULT false,
-     key_expired_at  TIMESTAMP NULL,
      civ_key             VARCHAR(10) NULL,
      CONSTRAINT pk_user_verified PRIMARY KEY(id)
    );`;
@@ -162,6 +163,55 @@ const createSessionStoreTableSql = () =>
      user_id         INT(11) NOT NULL,
      CONSTRAINT pk_session_store PRIMARY KEY(id)
    )`;
+
+const createTestUserVerifiesData = () =>
+  `
+    INSERT INTO \`summers-sns\`.user_verifies (email, phone, is_verified, civ_key)
+    SELECT null, '01011223344', 1, 123456
+    FROM DUAL
+    WHERE NOT EXISTS
+        (
+            SELECT phone
+            FROM \`summers-sns\`.user_verifies
+            WHERE phone = '01011223344'
+        );
+  `;
+
+const createTestUserData = async () => {
+  const password = await hashPlainText('test12', 4);
+  const query = `
+    INSERT INTO \`summers-sns\`.users (email, phone, realname, username, password)
+    SELECT null, ${TestSignIn.PHONE}, '박봉팔', 'bonpal12', ?
+    FROM DUAL
+    WHERE NOT EXISTS
+        (
+            SELECT phone
+            FROM \`summers-sns\`.users
+            WHERE phone = ${TestSignIn.PHONE}
+        );
+  `;
+  return { password, query };
+};
+
+const createTestUserRoleData = () => {
+  return `
+    INSERT INTO \`summers-sns\`.user_roles (user_id, updated_at, expired_at)
+    SELECT (
+        SELECT id
+        FROM \`summers-sns\`.users
+        WHERE phone = ${TestSignIn.PHONE}
+    ),
+    null,
+    null
+    FROM DUAL
+    WHERE NOT EXISTS
+        (
+            SELECT phone
+            FROM \`summers-sns\`.user_verifies
+            WHERE phone = ${TestSignIn.PHONE}
+        );
+  `;
+};
 
 const createDatabaseIfNotExists = async (conn: Pool): Promise<void> => {
   await conn.query(createDatabaseSqlIfNotExists());
@@ -177,6 +227,11 @@ const createDatabaseIfNotExists = async (conn: Pool): Promise<void> => {
   await conn.query(createAdminTableSql());
   await conn.query(createUserVerifyTableSql());
   await conn.query(createSessionStoreTableSql());
+
+  await conn.query(createTestUserVerifiesData());
+  const { query: userQuery, password } = await createTestUserData();
+  await conn.query(userQuery, password);
+  await conn.query(createTestUserRoleData());
 };
 
 export default createDatabaseIfNotExists;

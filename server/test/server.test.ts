@@ -1,16 +1,13 @@
 import request from 'supertest';
-import getTestServer from '@test/app';
-import { DatabaseConnection } from '@config/database';
 import { Server } from 'http';
+import { mariadb } from '@config/index';
+import getTestServer from '@test/app';
 
 describe('서버 환경 테스트', () => {
   let app: Server;
-  let mariadb: DatabaseConnection;
 
   beforeAll(async () => {
-    const [testServer, dbPool] = await getTestServer();
-    app = testServer;
-    mariadb = dbPool;
+    app = await getTestServer();
   });
 
   afterAll(async () => {
