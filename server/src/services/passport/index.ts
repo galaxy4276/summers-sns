@@ -91,7 +91,12 @@ class LocalPassPort extends AbstractLocalPassport {
         if (sid in session) {
           delete session[sid];
           await this.removeSessionDatabase(ctx, sid);
+          ctx.body = {
+            message: '로그아웃에 성공하였습니다.',
+          };
+          ctx.response.status = 200;
         }
+        await next();
       } catch (err) {
         debug(err);
         await next();

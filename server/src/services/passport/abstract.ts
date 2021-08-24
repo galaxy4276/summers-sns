@@ -7,7 +7,7 @@ import { DbSession } from '@typings/user';
 import AuthErrorAbstract from '@services/passport/error-abstract';
 
 export function isDbSession(data: number | DbSession): data is DbSession {
-  return (<DbSession>data).session_id !== undefined;
+  return (<DbSession>data)?.session_id !== undefined;
 }
 
 /**
