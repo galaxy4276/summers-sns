@@ -19,16 +19,12 @@ describe('로그인 통합 테스트', () => {
     };
   });
 
-  function agentPostWrap(send: any) {
-    return agent.post(TestAPI.LOGIN).send(send);
-  }
-
-  function agentPostWrapWithCookie(api: string) {
-    return agent
-      .post(TestAPI.LOGIN)
+  const agentPostWrap = (send: any) => agent.post(TestAPI.LOGIN).send(send);
+  const agentPostWrapWithCookie = (api: string) =>
+    agent
+      .post(api)
       .set('Cookie', [`sid=${cookie}`])
       .send(loginForm);
-  }
 
   afterAll(async () => {
     app.close();
@@ -50,7 +46,6 @@ describe('로그인 통합 테스트', () => {
     await agentPostWrap(loginForm).then(({ headers, statusCode }) => {
       const sidCookie = headers['set-cookie'][0].split(';')[0];
       cookie = sidCookie.slice(4);
-      console.log(cookie);
       expect(sidCookie).toContain('sid');
       expect(statusCode).toBe(200);
     });
@@ -66,12 +61,11 @@ describe('로그인 통합 테스트', () => {
   });
 
   it('로그아웃에 성공한다.', async () => {
-    await request(app)
-      .post(TestAPI.LOGOUT)
-      .set('Cookie', [`sid=${cookie}`])
-      .then(({ statusCode, body: { message } }) => {
+    await agentPostWrapWithCookie(TestAPI.LOGOUT).then(
+      ({ statusCode, body: { message } }) => {
         expect(statusCode).toBe(200);
         expect(message).toBe('로그아웃에 성공하였습니다.');
-      });
+      },
+    );
   });
 });
