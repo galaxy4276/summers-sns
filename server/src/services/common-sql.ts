@@ -101,8 +101,8 @@ export async function getSafeUserByPhone(
  */
 export async function getUserByRule(
   ctx: Context,
-): Promise<AllUserProps | void> {
+): Promise<AllUserProps | undefined> {
   const { email, phone } = ctx.request.body;
   if (email) return getUserByEmail(email);
-  if (phone) return getUserByPhone(email);
+  if (phone) return getUserByPhone(phone);
 }

@@ -16,4 +16,5 @@ userRouter.post('/sms/verify', verifySecurityCodeController);
 userRouter.post('/', signInController);
 userRouter.post('/login', LocalPassport.authenticate(), loginController);
 
-export default userRouter;
+export { userRouter };
+export default {};
