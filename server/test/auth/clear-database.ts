@@ -1,17 +1,17 @@
-import { DatabaseConnection } from '@config/database';
 import { AllUserProps } from '@typings/user';
-import { PoolConnection } from 'mariadb';
+import { Connection, PoolConnection } from 'mariadb';
+import { mariadb } from '@config/index';
 
 /**
  * @desc 이메일로 사용자 유저 정보를 찾는다.
  * @return 사용자 정보 객체를 반환합니다.
  */
 export const getUserByEmail = async (
-  mariadb: PoolConnection,
+  conn: PoolConnection,
   email: string,
 ): Promise<AllUserProps> => {
   const user = (
-    await mariadb.query(
+    await conn.query(
       `
   SELECT * FROM \`summers-sns\`.users WHERE email = ?
   `,
@@ -19,7 +19,6 @@ export const getUserByEmail = async (
     )
   )[0] as AllUserProps;
 
-  await mariadb.end();
   return user;
 };
 
@@ -28,11 +27,11 @@ export const getUserByEmail = async (
  * @return 사용자 정보 객체를 반환합니다.
  */
 export const getUserByPhone = async (
-  mariadb: PoolConnection,
+  conn: PoolConnection,
   phone: string | number,
 ): Promise<AllUserProps> => {
   const user = (
-    await mariadb.query(
+    await conn.query(
       `
   SELECT * FROM \`summers-sns\`.users WHERE phone = ?
   `,
@@ -40,12 +39,55 @@ export const getUserByPhone = async (
     )
   )[0] as AllUserProps;
 
-  await mariadb.end();
   return user;
 };
 
+/**
+ * @desc 테스트에 사용된 계정들에 대해 DELETE Queries 를 수행합니다.
+ */
+export const deleteTestUsersInfo = (
+  conn: Connection,
+  emailAccId: number,
+  email: string,
+  phoneAccId: number,
+  phone: string | number,
+): void => {
+  conn.query(
+    `
+    DELETE FROM \`summers-sns\`.user_roles WHERE user_id = ?
+  `,
+    [phoneAccId],
+  );
+  conn.query(
+    `
+    DELETE FROM \`summers-sns\`.user_verifies WHERE email = ?
+  `,
+    [email],
+  );
+  conn.query(
+    `
+    DELETE FROM \`summers-sns\`.user_verifies WHERE phone = ?
+  `,
+    [phone],
+  );
+  conn.query(
+    `
+    DELETE FROM \`summers-sns\`.users WHERE id = ?
+  `,
+    [emailAccId],
+  );
+  conn.query(
+    `
+    DELETE FROM \`summers-sns\`.users WHERE id = ?
+  `,
+    [phoneAccId],
+  );
+};
+
+/**
+ * @desc 테스트에 사용된 계정들에 대해 트랜잭션이 설정된 DELETE SQL Queries 를 수행합니다.
+ */
 export default async function clearAccounts(
-  mariadb: DatabaseConnection,
   email: string,
   phone: string | number,
 ): Promise<void> {
@@ -58,35 +100,15 @@ export default async function clearAccounts(
   `,
     [emailAccId],
   );
-  await conn.query(
-    `
-    DELETE FROM \`summers-sns\`.user_roles WHERE user_id = ?
-  `,
-    [phoneAccId],
-  );
-  await conn.query(
-    `
-    DELETE FROM \`summers-sns\`.user_verifies WHERE email = ?
-  `,
-    [email],
-  );
-  await conn.query(
-    `
-    DELETE FROM \`summers-sns\`.user_verifies WHERE phone = ?
-  `,
-    [phone],
-  );
-  await conn.query(
-    `
-    DELETE FROM \`summers-sns\`.users WHERE id = ?
-  `,
-    [emailAccId],
-  );
-  await conn.query(
-    `
-    DELETE FROM \`summers-sns\`.users WHERE id = ?
-  `,
-    [phoneAccId],
-  );
+  await conn
+    .beginTransaction()
+    .then(() => {
+      deleteTestUsersInfo(conn, emailAccId, email, phoneAccId, phone);
+    })
+    .then(() => conn.commit())
+    .catch((err) => {
+      console.error(err);
+      conn.rollback();
+    });
   await conn.end();
 }
