@@ -5,5 +5,17 @@ info:
     summers-sns api
   version: "1.0.0"
 host: "localhost:8080"
+basePath: /api
 schemes:
   - "http"
+paths:
+  /user/credentials:
+    post:
+      summary: 사용자 인증정보를 생성합니다.
+      description: 회원가입으로 사용자를 생성하기 전에, 사용자 인증을 진행하기 위한 api 입니다.
+      produces:
+        - application/json
+      response:
+        201:
+          description: 사용자 인증정보가 생성되었습니다.
+
