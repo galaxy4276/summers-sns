@@ -37,7 +37,7 @@ class LocalPassPort extends AbstractLocalPassport {
           }
           ctx.response.status = 200;
           await conn.end();
-          await next();
+          return await next();
         }
 
         this.setAuthenticationFaultError(ctx);
@@ -55,9 +55,6 @@ class LocalPassPort extends AbstractLocalPassport {
    */
   session() {
     return async (ctx: Context, next: Next) => {
-      if (ctx.path === '/api/user/login') {
-        return next();
-      }
       try {
         const session = <Session>ctx.session;
         const clientSessionId = ctx.cookies.get('sid');
