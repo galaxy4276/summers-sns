@@ -1,5 +1,6 @@
 import Router from 'koa-router';
 import { LocalPassport } from '@services/index';
+import { isNotUserLogin } from '@middlewares/auth';
 import {
   createCredentialsController,
   loginController,
@@ -14,7 +15,12 @@ userRouter.post('/credentials', createCredentialsController);
 userRouter.post('/sms', sendSecurityCodeController);
 userRouter.post('/sms/verify', verifySecurityCodeController);
 userRouter.post('/', signInController);
-userRouter.post('/login', LocalPassport.authenticate(), loginController);
+userRouter.post(
+  '/login',
+  isNotUserLogin,
+  LocalPassport.authenticate(),
+  loginController,
+);
 
 export { userRouter };
 export default {};
