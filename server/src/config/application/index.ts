@@ -168,3 +168,5 @@ class KoaServer {
 export default function getKoaServer(): KoaServer {
   return new KoaServer();
 }
+
+export { KoaServer };

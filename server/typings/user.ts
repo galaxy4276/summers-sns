@@ -17,11 +17,13 @@ export interface AllUserProps extends SignInDefaultProps {
   email?: string;
   phone?: string;
   follower_count: number;
-  follwing_count: number;
+  following_count: number;
   created_at: Date;
   updated_at: Date;
   deleted_at?: Date;
 }
+
+export type SafeUserProps = Omit<AllUserProps, 'password' | 'deleted_at'>;
 
 interface Email {
   email: string;
@@ -32,7 +34,7 @@ interface Phone {
 }
 
 interface TestProp {
-  isTest?: boolean;
+  isTest?: boolean | string;
 }
 
 export type EmailUser = Email & TestProp;
@@ -57,3 +59,17 @@ export interface PhoneVerifyCode extends Phone {
 
 export type UserVerifyCivKeyReturnType = Pick<UserVerify, 'civ_key'> &
   Pick<UserVerify, 'id'>;
+
+export interface DbSession {
+  id: number;
+  session_id: string;
+  user_id: number;
+}
+
+export interface PhoneLogin extends Phone {
+  password: string;
+}
+
+export interface EmailLogin extends Email {
+  password: string;
+}
