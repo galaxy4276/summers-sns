@@ -3,6 +3,7 @@ import { PhoneLogin } from '@typings/user';
 import { TestAPI, TestSignIn } from '@test/helper/enum';
 import { Server } from 'http';
 import request, { SuperTest, Test } from 'supertest';
+import { expectBadStatusCode } from '@test/helper/util';
 
 describe('로그인 통합 테스트', () => {
   let app: Server;
@@ -31,15 +32,11 @@ describe('로그인 통합 테스트', () => {
   });
 
   it('계정정보없이 패스워드만 입력하면 인증이 실패한다.', async () => {
-    await agentPostWrap({ phone: loginForm.phone }).then((data) => {
-      expect(data.statusCode).toBe(400);
-    });
+    await agentPostWrap({ phone: loginForm.phone }).then(expectBadStatusCode);
   });
 
   it('패스워드 없이 폰 또는 이메일만 입력하면 인증이 실패한다.', async () => {
-    await agentPostWrap({ phone: loginForm.phone }).then((data) => {
-      expect(data.statusCode).toBe(400);
-    });
+    await agentPostWrap({ phone: loginForm.phone }).then(expectBadStatusCode);
   });
 
   it('로그인이 성공되어 쿠키 값이 반환된다.', async () => {
