@@ -171,7 +171,7 @@ const createPostHashtagTableSql = () =>
     post_id    INT(11) NOT NULL,
     CONSTRAINT pk_post_hashtag PRIMARY KEY(id),
     FOREIGN KEY(hashtag_id) REFERENCES \`hashtags\`(id),
-    FOREIGN KEY(post_id) REFERENCES \`post\`(id)
+    FOREIGN KEY(post_id) REFERENCES \`posts\`(id)
   );`;
 
 const createSessionStoreTableSql = () =>
