@@ -1,6 +1,6 @@
 import { Pool } from 'mariadb';
 import { hashPlainText } from '@services/index';
-import { TestSignIn } from '@test/enum';
+import { TestSignIn } from '@test/helper/enum';
 
 const createDatabaseSqlIfNotExists = () =>
   `

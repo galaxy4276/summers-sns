@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { Server } from 'http';
 import { mariadb } from '@config/index';
-import getTestServer from '@test/app';
+import getTestServer from '@test/helper/app';
 
 describe('서버 환경 테스트', () => {
   let app: Server;

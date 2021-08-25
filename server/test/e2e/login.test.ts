@@ -1,6 +1,6 @@
-import getTestServer from '@test/app';
+import getTestServer from '@test/helper/app';
 import { PhoneLogin } from '@typings/user';
-import { TestAPI, TestSignIn } from '@test/enum';
+import { TestAPI, TestSignIn } from '@test/helper/enum';
 import { Server } from 'http';
 import request, { SuperTest, Test } from 'supertest';
 
