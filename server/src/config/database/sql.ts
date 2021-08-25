@@ -155,6 +155,25 @@ const createUserVerifyTableSql = () =>
      CONSTRAINT pk_user_verified PRIMARY KEY(id)
    );`;
 
+const createHashtagTableSql = () =>
+  `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`hashtags\`
+   (
+      id         INT(11) AUTO_INCREMENT NOT NULL,
+      name       VARCHAR(50) NOT NULL,
+      CONSTRAINT pk_hashtag PRIMARY KEY(id)
+   );`;
+
+const createPostHashtagTableSql = () =>
+  `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`post_hashtags\`
+    (
+    id         INT(11) AUTO_INCREMENT NOT NULL,
+    hashtag_id INT(11) NOT NULL,
+    post_id    INT(11) NOT NULL,
+    CONSTRAINT pk_post_hashtag PRIMARY KEY(id),
+    FOREIGN KEY(hashtag_id) REFERENCES \`hashtags\`(id),
+    FOREIGN KEY(post_id) REFERENCES \`post\`(id)
+  );`;
+
 const createSessionStoreTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`session_store\`
    (
@@ -227,6 +246,8 @@ const createDatabaseIfNotExists = async (conn: Pool): Promise<void> => {
   await conn.query(createAdminTableSql());
   await conn.query(createUserVerifyTableSql());
   await conn.query(createSessionStoreTableSql());
+  await conn.query(createHashtagTableSql());
+  await conn.query(createPostHashtagTableSql());
 
   await conn.query(createTestUserVerifiesData());
   const { query: userQuery, password } = await createTestUserData();
