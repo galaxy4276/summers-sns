@@ -16,11 +16,11 @@ import {
   getUserVerifiesCivKeyByEmail,
   getUserVerifiesCivKeyByPhone,
   isVerifiedAccount,
-} from '@api/user/sql';
+} from '@api/auth/sql';
 import {
   getUserVerifiesIdByEmail,
   getUserVerifiesIdByPhone,
-} from '@api/user/services';
+} from '@api/auth/services';
 
 /**
  * @desc 이메일 회원가입 폼 검증 함수
@@ -98,7 +98,7 @@ export const validateUserCredential = async (
   form: EmailUser | PhoneUser,
 ): Promise<ValidateCredentialReturns> => {
   if (!((<EmailUser>form).email || (<PhoneUser>form).phone)) {
-    ctx.response.status = 400;
+    ctx.response.status = 422;
     ctx.body = {
       message: '인증정보가 존재하지 않습니다.',
     };
@@ -112,13 +112,12 @@ export const validateUserCredential = async (
   if ('phone' in form) validateUserRoleFormPhone(form);
   const previousError = await getBoolCheckPrevUserRole(form);
   if (previousError) {
-    ctx.response.status = 400;
+    ctx.response.status = 409;
     ctx.body = {
       message: previousError,
     };
     return { isFormError: false, isPrevious: true };
   }
-  ctx.response.status = 400;
   return { isFormError: false, isPrevious: false };
 };
 

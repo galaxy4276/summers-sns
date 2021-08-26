@@ -12,7 +12,7 @@ import {
   getUserVerifiesIdByEmailSql,
   getUserVerifiesIdByPhoneSql,
   setUserVerifiesKey,
-} from '@api/user/sql';
+} from '@api/auth/sql';
 import { createDigit, mailClient, twilioSms } from '@services/index';
 import { MessageInstance } from 'twilio/lib/rest/api/v2010/account/message';
 
