@@ -1,21 +1,81 @@
-swagger: "2.0"
+openapi: "3.0.0"
 info:
-  title: "Summers APIs"
+  title: "Summers SNS 서비스 API"
   description: >
-    summers-sns api
+    서머즈 SNS 서비스의 API 테스트를 위해 작성된 문서입니다.
   version: "1.0.0"
-host: "localhost:8080"
-basePath: /api
-schemes:
-  - "http"
-paths:
-  /user/credentials:
-    post:
-      summary: 사용자 인증정보를 생성합니다.
-      description: 회원가입으로 사용자를 생성하기 전에, 사용자 인증을 진행하기 위한 api 입니다.
-      produces:
-        - application/json
-      response:
-        201:
-          description: 사용자 인증정보가 생성되었습니다.
 
+servers:
+  - url: "http://localhost:8080/api"
+    description: "개발 전용 서버"
+
+tags:
+  - name: auth
+    description: 🔰 인증 및 인가에 관한 API
+  - name: user
+    description: 😁 사용자에 관한 API
+paths:
+
+  /auth/credentials:
+    post:
+      summary: "사용자 인증 정보를 생성하여 저장합니다."
+      description: |+
+        이메일 또는 번호를 제공받아 사용자 인증 정보를 생성합니다.
+        둘 중, 한 정보는 필수입니다.
+        이미 생성된 정보에 대해서 409 코드와 함께 존재 여부를 알립니다.
+        잘못된 API 요청 양식에 대해서 422 코드를 반환합니다.
+      tags:
+        - auth
+      requestBody:
+        description: "사용자 인증 정보를 사용하기 위한 요청 정보"
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: string
+                - type: integer
+            example:
+                폰 번호 생성 예시:
+                  phone: "01033334444"
+                폰 번호 테스트 예시:
+                  phone: "01033334444"
+                  isTest: true
+                이메일 생성 예시:
+                  email: "your email"
+                이메일 테스트 예시:
+                  email: "your email"
+                  isTest: true
+
+      responses:
+        201:
+          description: "정보 생성 완료, 생성된 인증 정보의 id를 반환합니다."
+          content:
+            appplication/json:
+              schema:
+                type: object
+                properties:
+                  createdCredentialsId:
+                    type: integer
+                    description: "생성된 인증 정보의 ID"
+        409:
+          description: |+
+            이미 존재하는 정보가 있음을 의미합니다
+            인증 코드를 다시 해당 유저 인증 정보로 발송합니다.
+          content:
+            appplication/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: "인증 정보 재발송 정보 메시지"
+        422:
+          description: "잘못된 폼 요청 정보"
+          content:
+            appplication/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
