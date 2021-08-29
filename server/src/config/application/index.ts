@@ -1,5 +1,6 @@
-import Koa, { DefaultState, DefaultContext, Context } from 'koa';
 import { join } from 'path';
+import yamljs from 'yamljs';
+import Koa, { DefaultState, DefaultContext, Context } from 'koa';
 import { setLevel as setLogLevel } from 'loglevel';
 import koaBody from 'koa-body';
 import morgan from 'koa-morgan';
@@ -8,11 +9,10 @@ import { config as loadEnvVariables } from 'dotenv';
 import Joi from 'joi';
 import { SystemVariables } from '@typings/system';
 import { ConnectionConfig } from 'mariadb';
-import { Document, loadDocumentSync } from 'swagger2';
-import { ui } from 'swagger2-koa';
 import rootRouter from '@api/index';
 import session from 'koa-session';
 import { LocalPassport } from '@services/index';
+import { koaSwagger } from 'koa2-swagger-ui';
 
 type NumberVariables = number | undefined;
 
@@ -24,10 +24,8 @@ class KoaServer {
   private router: Router;
   private readonly isDevelopment: boolean;
   private readonly systemVariables: SystemVariables;
-  private readonly swaggerDocument: Document;
 
   constructor() {
-    this.swaggerDocument = this.getInitSwaggerDocumentation();
     this.systemVariables = this.getInitValidationSystemVariable();
     this.app = new Koa();
     this.router = rootRouter;
@@ -58,7 +56,13 @@ class KoaServer {
 
   setSwaggerUi(): this {
     if (this.systemVariables.mode === 'development') {
-      this.app.use(ui(this.swaggerDocument, '/swagger'));
+      const spec = yamljs.load(join(__dirname, '..', '..', '..', 'api.yaml'));
+      this.app.use(
+        koaSwagger({
+          routePrefix: '/swagger',
+          swaggerOptions: { spec },
+        }),
+      );
     }
     return this;
   }
@@ -152,13 +156,6 @@ class KoaServer {
       throw Error(`💥 cannot read system variables 💥 \n${error}`);
     }
     return value as SystemVariables;
-  }
-
-  getInitSwaggerDocumentation(): Document {
-    const document = loadDocumentSync(
-      join(__dirname, '..', '..', '..', 'api.yaml'),
-    );
-    return document as Document;
   }
 }
 

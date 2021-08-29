@@ -11,9 +11,9 @@ const errorCb = (err: Error, ctx: Context): void => {
 
 async function main(): Promise<void> {
   const koa = getKoaServer()
-    .setSwaggerUi()
     .setLogger()
     .setParser()
+    .setSwaggerUi()
     .setAuthMiddlewares()
     .setRouter()
     .setErrorHandler(errorCb);
