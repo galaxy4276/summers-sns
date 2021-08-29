@@ -12,12 +12,14 @@ import {
   getUserVerifiesIdByPhoneSql,
   isVerifiedAccount,
   setActivateUserVerifies,
-} from '@api/user/sql';
+} from '@api/auth/sql';
 import { Server } from 'http';
 import getTestServer from '@test/helper/app';
 import {
+  expectAlreadyStatusCode,
   expectBadStatusCode,
   expectCreatedStatusCode,
+  expectMissFormStatusCode,
 } from '@test/helper/util';
 
 const { CREATE_CREDENTIALS, SIGN_IN } = TestAPI;
@@ -62,12 +64,12 @@ describe('인증 테스트', () => {
         await sendPost(CREATE_CREDENTIALS, {
           phone: phoneForm.phone,
           email: emailForm.email,
-        }).then(expectBadStatusCode);
+        }).then(expectMissFormStatusCode);
       });
 
       it('이메일 정보 생성요청 시 이메일형식이 아니면 실패한다.', async () => {
         await sendPost(CREATE_CREDENTIALS, { email: 'thisIsEmail' }).then(
-          expectBadStatusCode,
+          expectMissFormStatusCode,
         );
       });
     });
@@ -77,12 +79,14 @@ describe('인증 테스트', () => {
     it('이메일 정보로 사용자 인증 정보를 생성한다.', async () => {
       await sendPost(CREATE_CREDENTIALS, emailForm).then((data) => {
         expect(data.statusCode).toBe(201);
-        expect(typeof data.body.createdRoleId).toBe('number');
+        expect(typeof data.body.createdCredentialsId).toBe('number');
       });
     });
 
     it('이미 생성된 이메일 정보로 사용자 인증 정보를 생성할 수 없다.', async () => {
-      await sendPost(CREATE_CREDENTIALS, emailForm).then(expectBadStatusCode);
+      await sendPost(CREATE_CREDENTIALS, emailForm).then(
+        expectAlreadyStatusCode,
+      );
     });
 
     it('폰 정보로 사용자 인증 정보를 생성한다.', async () => {
@@ -93,7 +97,7 @@ describe('인증 테스트', () => {
 
     it('이미 생성된 폰 정보로 사용자 인증 정보를 생성할 수 없다.', async () => {
       await sendPost(CREATE_CREDENTIALS, { ...phoneForm, isTest: true }).then(
-        expectBadStatusCode,
+        expectAlreadyStatusCode,
       );
     });
   });
@@ -106,7 +110,7 @@ describe('인증 테스트', () => {
           password: emailSignInForm.password,
           realname: emailSignInForm.realname,
         };
-        await sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('번호 회원가입에 번호 정보가 없으면 실패한다.', async () => {
@@ -115,7 +119,7 @@ describe('인증 테스트', () => {
           password: emailSignInForm.password,
           realname: emailSignInForm.realname,
         };
-        sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('username 항목이 없으면 실패한다.', async () => {
@@ -124,7 +128,7 @@ describe('인증 테스트', () => {
           password: emailSignInForm.password,
           realname: emailSignInForm.realname,
         };
-        sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('username 길이가 3글자 미만이면 실패한다.', async () => {
@@ -132,7 +136,7 @@ describe('인증 테스트', () => {
           ...emailSignInForm,
           username: 'th',
         };
-        await sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('username 길이가 10글자를 넘으면 실패한다.', async () => {
@@ -140,7 +144,7 @@ describe('인증 테스트', () => {
           ...emailSignInForm,
           username: 'iamgreatherthan10characters',
         };
-        await sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('realname 항목이 없으면 실패한다.', async () => {
@@ -149,7 +153,7 @@ describe('인증 테스트', () => {
           password: emailSignInForm.password,
           username: emailSignInForm.username,
         };
-        await sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('realname 길이가 3글자 미만이면 실패한다.', async () => {
@@ -157,7 +161,7 @@ describe('인증 테스트', () => {
           ...emailSignInForm,
           realname: 'th',
         };
-        await sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('realname 길이가 30글자를 초과면 실패한다.', async () => {
@@ -166,7 +170,7 @@ describe('인증 테스트', () => {
           realname:
             'iamgreatherthan30charactersiamgreatherthan30charactersiamgreatherthan30charactersiamgreatherthan30characters',
         };
-        await sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('password 항목이 없으면 실패한다.', async () => {
@@ -175,7 +179,7 @@ describe('인증 테스트', () => {
           username: emailSignInForm.username,
           realname: emailSignInForm.realname,
         };
-        await sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('password 길이가 8글자 미만이면 실패한다.', async () => {
@@ -183,7 +187,7 @@ describe('인증 테스트', () => {
           ...emailSignInForm,
           password: 'eightee',
         };
-        await sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
 
       it('password 길이가 50글자 초과면 실패한다.', async () => {
@@ -191,7 +195,7 @@ describe('인증 테스트', () => {
           ...emailSignInForm,
           realname: 'fifteenfifteenfifteenfifteenfifteenfifteenfifteenfifteen',
         };
-        await sendPost(SIGN_IN, testForm).then(expectBadStatusCode);
+        await sendPost(SIGN_IN, testForm).then(expectMissFormStatusCode);
       });
     });
   });
@@ -214,12 +218,8 @@ describe('인증 테스트', () => {
 
     it('이메일로 이미 가입된 대상은 가입되지 않는다.', async () => {
       await sendPost(SIGN_IN, { ...emailSignInForm, username: 'bear1' }).then(
-        expectBadStatusCode,
+        expectAlreadyStatusCode,
       );
-    });
-
-    it('인증되지 않은 번호 유저는 가입되지 않는다.', async () => {
-      await sendPost(SIGN_IN, phoneSignInForm).then(expectBadStatusCode);
     });
 
     it('인증되지 않은 폰 계정은 가입되지 않는다.', async () => {
@@ -239,7 +239,7 @@ describe('인증 테스트', () => {
 
     it('번호로 가입된 대상은 가입되지 않는다.', async () => {
       await sendPost(SIGN_IN, { ...phoneSignInForm, username: 'bear2' }).then(
-        expectBadStatusCode,
+        expectAlreadyStatusCode,
       );
     });
   });

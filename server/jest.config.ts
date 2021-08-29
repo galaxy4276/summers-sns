@@ -2,6 +2,7 @@ import { Config } from '@jest/types'
 
 const jestConfig: Config.InitialOptions = {
   rootDir: './',
+  roots: ['./test/'],
   moduleFileExtensions: ['json', 'ts', 'js'],
   testEnvironment: 'node',
   transform: {
