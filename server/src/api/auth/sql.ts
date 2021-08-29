@@ -94,10 +94,13 @@ export const createUserRole = async (userId: number): Promise<void> => {
  * @desc 사용자 인증 정보를 생성합니다.
  * @return 생성된 사용자 번호를 반환합니다.
  */
-export const createUserCredentials = async (
-  email?: string,
-  phone?: string,
-): Promise<number | void> => {
+export const createUserCredentials = async ({
+  email,
+  phone,
+}: {
+  email?: string;
+  phone?: string | number;
+}): Promise<number | void> => {
   try {
     const conn = await mariadb.pool.getConnection();
     if (email) {

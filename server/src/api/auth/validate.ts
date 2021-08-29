@@ -21,6 +21,7 @@ import {
   getUserVerifiesIdByEmail,
   getUserVerifiesIdByPhone,
 } from '@api/auth/services';
+import { setBodyMessage } from '@services/context';
 
 /**
  * @desc 이메일 회원가입 폼 검증 함수
@@ -88,7 +89,6 @@ const validateUserRoleFormPhone = (form: PhoneUser) => {
  * @desc 입력 폼을 검사하고, 사용자 인증 정보가 존재하는지 검사합니다.
  * @return @type ValidateCredentialReturns
  */
-
 type ValidateCredentialReturns = {
   isFormError: boolean;
   isPrevious: boolean;
@@ -97,11 +97,13 @@ export const validateUserCredential = async (
   ctx: Context,
   form: EmailUser | PhoneUser,
 ): Promise<ValidateCredentialReturns> => {
+  console.log(form);
   if (!((<EmailUser>form).email || (<PhoneUser>form).phone)) {
-    ctx.response.status = 422;
-    ctx.body = {
-      message: '인증정보가 존재하지 않습니다.',
-    };
+    setBodyMessage(ctx, '인증정보가 존재하지 않습니다.', 422);
+    return { isFormError: true, isPrevious: false };
+  }
+  if ((<EmailUser>form).email && (<PhoneUser>form).phone) {
+    setBodyMessage(ctx, '잘못된 요청정보입니다.', 422);
     return { isFormError: true, isPrevious: false };
   }
 
@@ -112,10 +114,7 @@ export const validateUserCredential = async (
   if ('phone' in form) validateUserRoleFormPhone(form);
   const previousError = await getBoolCheckPrevUserRole(form);
   if (previousError) {
-    ctx.response.status = 409;
-    ctx.body = {
-      message: previousError,
-    };
+    setBodyMessage(ctx, previousError, 409);
     return { isFormError: false, isPrevious: true };
   }
   return { isFormError: false, isPrevious: false };
@@ -143,7 +142,7 @@ export const isValidUser = async (
   form: EmailSignInProps | PhoneSignInProps,
 ): Promise<boolean> => {
   if (!((<EmailSignInProps>form).email || (<PhoneSignInProps>form).phone)) {
-    ctx.response.status = 400;
+    ctx.response.status = 422;
     return true;
   }
   if ('email' in form) validateSignInFormEmail(form);
@@ -151,7 +150,7 @@ export const isValidUser = async (
 
   const isPrevUsername = await checkPrevUserByUsername(form.username);
   if (isPrevUsername) {
-    ctx.response.status = 400;
+    ctx.response.status = 409;
     ctx.body = {
       message: '이미 존재하는 유저이름입니다.',
     };
@@ -159,7 +158,7 @@ export const isValidUser = async (
   }
   const error = await checkPrevUserByRule(form);
   if (error) {
-    ctx.response.status = 400;
+    ctx.response.status = 409;
     ctx.body = {
       message: error,
     };
@@ -242,13 +241,13 @@ export const verifySecurityCode = async (
   form: EmailVerifyCode | PhoneVerifyCode,
 ): Promise<VerifySecurityCodeReturnType> => {
   const setKeyError = () => {
-    ctx.response.status = 400;
+    ctx.response.status = 422;
     ctx.body = {
       message: '인증 정보 또는 인증코드가 존재하지 않습니다.',
     };
   };
   const setCorrectError = () => {
-    ctx.response.status = 400;
+    ctx.response.status = 422;
     ctx.body = {
       message: '입력된 인증코드가 잘못되었습니다.',
     };
@@ -281,4 +280,23 @@ export const verifySecurityCode = async (
     };
   }
   return { isCorrectKey: false };
+};
+
+/**
+ * @desc email, phone 항목이 같이 존재하는 지 유무를 bool 값으로 반환합니다.
+ * @addition 두 값 모두 존재하지 않아도 true 를 반환합니다.
+ */
+export const isBothAuthProps = (
+  ctx: Context,
+  { email, phone }: { email?: string; phone?: string },
+): boolean => {
+  if (!(email || phone)) {
+    setBodyMessage(ctx, '요청 props 가 잘못되었습니다.', 422);
+    return true;
+  }
+  if (email && phone) {
+    setBodyMessage(ctx, '요청 props 가 잘못되었습니다.', 422);
+    return true;
+  }
+  return false;
 };
