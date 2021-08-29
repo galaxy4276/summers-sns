@@ -6,10 +6,10 @@ export enum TestSignIn {
 }
 
 export enum TestAPI {
-  SIGN_IN = '/api/user',
-  CREATE_CREDENTIALS = '/api/user/credentials',
-  SEND_SECURITY_CODE = '/api/user/sms',
-  VERIFY_SECURITY_CODE = '/api/user/sms/verify',
-  LOGIN = '/api/user/login',
-  LOGOUT = '/api/user/logout',
+  SIGN_IN = '/api/auth',
+  CREATE_CREDENTIALS = '/api/auth/credentials/test',
+  SEND_SECURITY_CODE = '/api/auth/sms',
+  VERIFY_SECURITY_CODE = '/api/auth/sms/verify',
+  LOGIN = '/api/auth/login',
+  LOGOUT = '/api/auth/logout',
 }
