@@ -1,18 +1,20 @@
 import { Context, Next } from 'koa';
 import { createUserCredentials, setActivateUserVerifies } from '@api/auth/sql';
-import { handlingJoiError, hashPlainText, isTestProps } from '@services/index';
 import {
-  createUser,
-  isBothAuthProps,
-  sendSecurityCodeByRules,
-} from '@api/auth/services';
+  handlingJoiError,
+  hashPlainText,
+  setBodyByProps,
+} from '@services/index';
+import { createUser, sendSecurityCodeByRules } from '@api/auth/services';
+import { processResendCode } from '@api/auth/services/credentials';
 import {
   isVerifiedUser,
   isVerifySecurityCodeForm,
   isValidUser,
   validateUserCredential,
   verifySecurityCode,
-} from './validate';
+  isBothAuthProps,
+} from '../validate';
 
 /**
  * @desc 사용자를 검증하고 회원가입 로직을 수행하는 컨트롤러
@@ -55,29 +57,16 @@ export const createCredentialsController = async (
       credentialsForm,
     );
     if (isFormError) return await next();
-    const isTest = isTestProps(ctx, '이미 존재하는 인증정보입니다.', 409);
-
     if (isPrevious) {
-      // 인증 정보가 이미 존재하면, SMS 코드만 새로 갱신해서 발송
-      if (isTest) return await next();
-      const { isError } = await sendSecurityCodeByRules(ctx, credentialsForm);
-      if (isError) return await next();
+      await processResendCode(ctx);
       return await next();
     }
     const createdCredentialsId = (await createUserCredentials(
-      credentialsForm.email,
-      credentialsForm.phone,
+      credentialsForm,
     )) as number;
-    if (isTest) {
-      isTestProps(ctx, '생성완료', 201);
-      return await next();
-    }
     const { isError } = await sendSecurityCodeByRules(ctx, credentialsForm);
     if (isError) return await next();
-    ctx.response.status = 201;
-    ctx.body = {
-      createdCredentialsId,
-    };
+    setBodyByProps(ctx, { createdCredentialsId }, 201);
     return await next();
   } catch (err) {
     const isJoi = handlingJoiError(ctx, err);

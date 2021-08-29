@@ -1,17 +1,19 @@
 import Router from 'koa-router';
 import { LocalPassport } from '@services/index';
 import { isNotUserLogin, isUserLogin } from '@middlewares/auth';
+import { createCredentialsTestController } from '@api/auth/controllers';
 import {
   createCredentialsController,
   loginController,
   sendSecurityCodeController,
   signInController,
   verifySecurityCodeController,
-} from './controller';
+} from './controllers/business';
 
 const authRouter = new Router({ prefix: '/auth' });
 
 authRouter.post('/', signInController);
+authRouter.post('/credentials/:isTest', createCredentialsTestController);
 authRouter.post('/credentials', createCredentialsController);
 authRouter.post('/sms', sendSecurityCodeController);
 authRouter.post('/sms/verify', verifySecurityCodeController);

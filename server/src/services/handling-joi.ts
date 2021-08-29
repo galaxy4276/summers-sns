@@ -8,7 +8,7 @@ export default function handlingJoiError(ctx: Context, err: Error): boolean {
     ctx.body = {
       message: err.message,
     };
-    ctx.response.status = 400;
+    ctx.response.status = 422;
     return true;
   }
   return false;
