@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import testRouter from '@api/test/test.routes';
+import testRouter from '@api/test/routes';
 import { authRouter } from '@api/auth';
 
 const rootRouter = new Router({ prefix: '/api' });

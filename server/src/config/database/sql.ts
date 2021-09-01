@@ -123,7 +123,7 @@ const createUserRoleTableSql = () =>
   `CREATE TABLE IF NOT EXISTS \`summers-sns\`.\`user_roles\`
   (
      id         INT(11) AUTO_INCREMENT NOT NULL,
-     user_id    INT(11) NOT NULL,
+     user_id    INT(11) UNIQUE NOT NULL,
      updated_at TIMESTAMP NULL,
      expired_at TIMESTAMP NULL,
      CONSTRAINT pk_user_roles PRIMARY KEY(id),
@@ -214,21 +214,21 @@ const createTestUserData = async () => {
 
 const createTestUserRoleData = () => {
   return `
-    INSERT INTO \`summers-sns\`.user_roles (user_id, updated_at, expired_at)
-    SELECT (
-        SELECT id
-        FROM \`summers-sns\`.users
-        WHERE phone = ${TestSignIn.PHONE}
-    ),
-    null,
-    null
-    FROM DUAL
-    WHERE NOT EXISTS
-        (
-            SELECT phone
-            FROM \`summers-sns\`.user_verifies
-            WHERE phone = ${TestSignIn.PHONE}
-        );
+      INSERT INTO \`summers-sns\`.user_roles (user_id, updated_at, expired_at)
+      SELECT (
+          SELECT id
+          FROM \`summers-sns\`.users
+          WHERE phone = ${TestSignIn.PHONE}
+      ),
+      null,
+      null
+      FROM DUAL
+      WHERE NOT EXISTS
+          (
+              SELECT phone
+              FROM \`summers-sns\`.user_verifies
+              WHERE phone = ${TestSignIn.PHONE}
+          );
   `;
 };
 
@@ -252,7 +252,11 @@ const createDatabaseIfNotExists = async (conn: Pool): Promise<void> => {
   await conn.query(createTestUserVerifiesData());
   const { query: userQuery, password } = await createTestUserData();
   await conn.query(userQuery, password);
-  await conn.query(createTestUserRoleData());
+  try {
+    await conn.query(createTestUserRoleData());
+  } catch (err) {
+    console.log('MockData 의 userRole 이 이미 존재합니다.');
+  }
 };
 
 export default createDatabaseIfNotExists;

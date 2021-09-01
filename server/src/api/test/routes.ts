@@ -1,6 +1,7 @@
 import Router from 'koa-router';
 import { debugSessionController } from '@api/test/test.controller';
 import { Session } from 'koa-session';
+import { createCredentialsTestController } from '@api/auth/controllers';
 
 const testRouter = new Router({ prefix: '/test' });
 
@@ -14,6 +15,7 @@ testRouter.get('/session/views', (ctx) => {
     n,
   };
 });
+testRouter.post('/auth/credentials', createCredentialsTestController);
 testRouter.get('/session/init', (ctx) => {
   ctx.session = null;
   ctx.body = {
