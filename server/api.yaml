@@ -38,10 +38,8 @@ paths:
             example:
                 폰 번호 생성 예시:
                   phone: "01033334444"
-                  isTest: true
                 이메일 생성 예시:
                   email: "your email"
-
       responses:
         201:
           description: "정보 생성 완료, 생성된 인증 정보의 id를 반환합니다."
@@ -74,6 +72,153 @@ paths:
                 properties:
                   message:
                     type: string
+
+  /auth/sms:
+    post:
+      summary: "지정된 이메일 또는 폰 번호로 보안코드를 전송합니다."
+      description: |+
+        보안 코드는 6자리 입니다.
+      tags:
+        - auth
+      requestBody:
+        description: "폰 또는 이메일 정보"
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: string
+                - type: integer
+            example:
+              폰 정보 예시:
+                phone: "01033334444"
+              이메일 정보 예시:
+                email: "your email"
+      responses:
+        422:
+          description: "잘못된 폼 요청 정보"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        200:
+          description: "인증 코드 발송 성공"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: "인증번호 발송 메시지"
+
+  /auth/sms/verify:
+    post:
+      summary: "인증코드를 검사하고 성공 여부를 데이터베이스에 등록합니다."
+      description: |+
+        인증 코드를 검사 후, 성공 시 데이테베이스에 성공 여부를 등록하고 성공 메시지를 반환합니다.
+        실패 시, 실패 코드와 함께 메시지를 반환홥니다.
+      tags:
+        - auth
+      requestBody:
+        summary: "폰 번호 혹은 이메일 정보와 인증 코드"
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              폰 정보 예시:
+                phone: "01033334444"
+                code: 010010
+              이메일 정보 예시:
+                email: "your email"
+                code: 010010
+      responses:
+        200:
+          description: "인증 코드 검사 성공"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: "인증코드 검사 성공 메시지"
+        422:
+          description: "인증 정보 또는 인증 코드 정보가 등록되어 있지 않음"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        400:
+          description: "인증코드가 잘못되었습니다."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+
+  /auth/login:
+    post:
+      summary: "로그인을 수행합니다."
+      description: |+
+        유저 정보와 비밀번호 정보를 받아서 로그인을 수행합니다.
+        로그인에 성공한다면 session 에 대한 cookie 값을 설정합니다.
+      tags:
+        - auth
+      requestBody:
+        description: "이메일 또는 폰 번호와 비밀번호 정보"
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              번호 예시:
+                phone: "01011112222"
+                password: "password"
+              이메일 예시:
+                email: "your email"
+                password: "password"
+      responses:
+        200:
+          description: "로그인 성공"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        401:
+          description: "비밀번호 불일치"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        429:
+          description: "잘못된 폼 요청 정보"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
   /test/auth/credentials:
     post:
       summary: "사용자 인증 정보를 생성하여 저장합니다."
