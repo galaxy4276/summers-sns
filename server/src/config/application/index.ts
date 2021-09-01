@@ -59,7 +59,7 @@ class KoaServer {
       const spec = yamljs.load(join(__dirname, '..', '..', '..', 'api.yaml'));
       this.app.use(
         koaSwagger({
-          routePrefix: '/swagger',
+          routePrefix: '/',
           swaggerOptions: { spec },
         }),
       );

@@ -213,15 +213,17 @@ export const isVerifySecurityCodeForm = (
   form: EmailVerifyCode | PhoneVerifyCode,
 ): boolean => {
   const setError = () => {
-    ctx.response.status = 400;
+    ctx.response.status = 429;
     ctx.body = {
       message: '잘못된 요청입니다.',
     };
   };
   if ('email' in form) {
+    setError();
     return form.code !== undefined;
   }
   if ('phone' in form) {
+    setError();
     return form.code !== undefined;
   }
   setError();
@@ -247,7 +249,7 @@ export const verifySecurityCode = async (
     };
   };
   const setCorrectError = () => {
-    ctx.response.status = 422;
+    ctx.response.status = 400;
     ctx.body = {
       message: '입력된 인증코드가 잘못되었습니다.',
     };
